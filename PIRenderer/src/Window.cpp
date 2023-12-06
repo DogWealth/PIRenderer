@@ -49,6 +49,7 @@ namespace PIRenderer {
 			Clear();
 
 			//SetPixel();
+			m_Canvas->SetRotationMatrix(0, 0, m_Rotation);
 			m_Canvas->DrawTriangle({ 100, 100, 0 }, { 100, 200, 0 }, { 350, 150, 0 }, { 1, 0, 0 });
 
 			Render();
@@ -93,6 +94,14 @@ namespace PIRenderer {
 		{
 			SDL_Log("SDLK_DOWN!");
 			start += 10;
+			m_Rotation += 2;
+		}
+
+		if (KeyCode == SDLK_UP)
+		{
+			SDL_Log("SDLK_DOWN!");
+			start += 10;
+			m_Rotation -= 2;
 		}
 	}
 	void Window::SetPixel()

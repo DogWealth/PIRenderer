@@ -2,10 +2,12 @@
 #include <string>
 #include <algorithm>
 
+
 namespace PIRenderer {
 	Canvas::Canvas(uint32_t* framBuffer, int width, int height)
 		: m_FramBuffer(framBuffer), m_Width(width), m_Height(height)
 	{
+		m_RotationMatrix = Matrix4::Identity();
 	}
 
 	Canvas::~Canvas()
@@ -33,6 +35,10 @@ namespace PIRenderer {
 
 	void Canvas::DrawTriangle(Vector3 v1, Vector3 v2, Vector3 v3, const Vector3& color)
 	{
+		v1 = v1 * m_RotationMatrix;
+		v2 = v2 * m_RotationMatrix;
+		v3 = v3 * m_RotationMatrix;
+/*********************************************/
 		if (v1.y > v2.y) std::swap(v1, v2);
 		if (v1.y > v3.y) std::swap(v1, v3);
 		if (v2.y > v3.y) std::swap(v2, v3);
@@ -76,6 +82,11 @@ namespace PIRenderer {
 				SetPixel(x, y, 0, color);
 			}
 		}
+	}
+
+	void Canvas::SetRotationMatrix(float yaw, float pitch, float roll)
+	{
+		m_RotationMatrix = Matrix4::RotateEuler(yaw, pitch, roll);
 	}
 
 	void Canvas::Clear()

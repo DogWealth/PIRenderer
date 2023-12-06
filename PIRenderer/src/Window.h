@@ -35,5 +35,7 @@ namespace PIRenderer {
 
 		int start = 0;
 
+		float m_Rotation = 0;
+
 	};
 }
