@@ -41,6 +41,9 @@ namespace PIRenderer {
 		//计算两点距离
 		static float Distance(const Vector3& v1, const Vector3& v2);
 
+		//插值
+		static Vector3 Interpolate(const Vector3& v1, const Vector3& v2, float t);
+
 
 	public:
 		float x;

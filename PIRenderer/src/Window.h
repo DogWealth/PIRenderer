@@ -3,7 +3,7 @@
 
 #include <stdio.h>
 #include <SDL.h>
-#include "Canvas.h"
+#include "Renderer.h"
 
 namespace PIRenderer {
 	class Window
@@ -31,11 +31,11 @@ namespace PIRenderer {
 		SDL_Surface* m_Surface;
 		SDL_Window* m_Window;
 
-		Canvas* m_Canvas;
+		Renderer* m_Canvas;
 
 		int start = 0;
 
-		float m_Rotation = 0;
+		float m_Rotation = -60;
 
 	};
 }

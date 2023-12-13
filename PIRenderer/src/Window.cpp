@@ -20,7 +20,7 @@ namespace PIRenderer {
 		//»ñÈ¡surface
 		m_Surface = SDL_GetWindowSurface(m_Window);
 
-		m_Canvas = new Canvas((uint32_t*)m_Surface->pixels, m_Width, m_Height);
+		m_Canvas = new Renderer((uint32_t*)m_Surface->pixels, m_Width, m_Height);
 	}
 
 	Window::~Window()
@@ -48,9 +48,17 @@ namespace PIRenderer {
 
 			Clear();
 
+			Vector3 p1(100, 100, 0), p2(200, 100, 0), p3(350, 150, 0);
+			Vertex v1(p1, p1, 0, 0, {1, 0, 0});
+			Vertex v2(p2, p1, 0, 0, { 0, 1, 0 });
+			Vertex v3(p3, p1, 0, 0, { 0, 0, 1 });
+
+			m_Canvas->DrawTriangle(v1, v2, v3);
+
 			//SetPixel();
 			m_Canvas->SetRotationMatrix(0, 0, m_Rotation);
-			m_Canvas->DrawTriangle({ 100, 100, 0 }, { 100, 200, 0 }, { 350, 150, 0 }, { 1, 0, 0 });
+			//m_Canvas->DrawTriangle({ 100, 100, 0 }, { 100, 200, 0 }, { 350, 150, 0 }, { 1, 0, 0 });
+			//m_Canvas->DrawTriangle({ 77.024323, 118.605453, 0 }, { 56.23377, 216.420349, 0 }, { 311.166260, 219.489319, 0 }, { 1, 0, 0 });
 
 			Render();
 		}
@@ -92,14 +100,14 @@ namespace PIRenderer {
 		SDL_Keycode KeyCode = event.key.keysym.sym;
 		if (KeyCode == SDLK_DOWN)
 		{
-			SDL_Log("SDLK_DOWN!");
+			//SDL_Log("SDLK_DOWN!");
 			start += 10;
 			m_Rotation += 2;
 		}
 
 		if (KeyCode == SDLK_UP)
 		{
-			SDL_Log("SDLK_DOWN!");
+			//SDL_Log("SDLK_DOWN!");
 			start += 10;
 			m_Rotation -= 2;
 		}
@@ -110,7 +118,7 @@ namespace PIRenderer {
 		for (int i = start; i < start + 200 && i < m_Height; i++)
 			for (int j = 0; j < 200; j++)
 			{
-				m_Canvas->SetPixel(i, j, 0, {1, 1, 0}); //£¨A£©RGB
+				m_Canvas->SetPixel(i, j, {1, 1, 0}); //£¨A£©RGB
 			}
 	}
 }

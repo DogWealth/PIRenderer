@@ -149,6 +149,12 @@ namespace PIRenderer {
 		return sqrt(dx * dx + dy * dy + dz * dz);
 	}
 
+	Vector3 Vector3::Interpolate(const Vector3& v1, const Vector3& v2, float t)
+	{
+
+		return v1 + (v2 - v1) * t;
+	}
+
 
 	Vector3 operator*(float k, const Vector3& vector)
 	{

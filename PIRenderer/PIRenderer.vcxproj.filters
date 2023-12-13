@@ -21,10 +21,13 @@
     <ClCompile Include="src\EntryPoint.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="src\Canvas.cpp">
+    <ClCompile Include="src\Renderer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="src\PIMath.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Vertex.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
@@ -32,10 +35,13 @@
     <ClInclude Include="src\Window.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="src\Canvas.h">
+    <ClInclude Include="src\Renderer.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="src\PIMath.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Vertex.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
