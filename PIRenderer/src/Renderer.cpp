@@ -16,14 +16,14 @@ namespace PIRenderer {
 
 	void Renderer::SetPixel(int x, int y, uint32_t color)
 	{
-		if (x < 0 || x > m_Width || y < 0 || y > m_Height)
+		if (x < 0 || x >= m_Width || y < 0 || y >= m_Height)
 			return;
 
 		int index = y * m_Width + x;
 		m_FramBuffer[index] = color;
 	}
 
-	void Renderer::SetPixel(int x, int y, Vector3 color)
+	void Renderer::SetPixel(int x, int y, Vector3f color)
 	{
 		uint32_t A = 0.0f;
 		uint32_t R = (uint32_t)(color.x * 255.f);
@@ -35,7 +35,7 @@ namespace PIRenderer {
 		SetPixel(x, y, Color);
 	}
 
-	void Renderer::DrawTriangle(Vector3 v1, Vector3 v2, Vector3 v3, const Vector3& color)
+	void Renderer::DrawTriangle(Vector3f v1, Vector3f v2, Vector3f v3, const Vector3f& color)
 	{
 		v1 = v1 * m_RotationMatrix;
 		v2 = v2 * m_RotationMatrix;
@@ -55,8 +55,8 @@ namespace PIRenderer {
 			float step_12 = (float)(y - v1.y) / halfH;
 			float step_13 = (float)(y - v1.y) / totalH;
 
-			Vector3 v_12 = v1 + (v2 - v1) * step_12;
-			Vector3 v_13 = v1 + (v3 - v1) * step_13;
+			Vector3f v_12 = v1 + (v2 - v1) * step_12;
+			Vector3f v_13 = v1 + (v3 - v1) * step_13;
 
 			if (v_12.x > v_13.x) std::swap(v_12, v_13);
 
@@ -74,8 +74,8 @@ namespace PIRenderer {
 			float step_23 = (float)(y - v2.y) / halfH;
 			float step_13 = (float)(y - v1.y) / totalH;
 
-			Vector3 v_23 = v2 + (v3 - v2) * step_23;
-			Vector3 v_13 = v1 + (v3 - v1) * step_13;
+			Vector3f v_23 = v2 + (v3 - v2) * step_23;
+			Vector3f v_13 = v1 + (v3 - v1) * step_13;
 
 			if (v_23.x > v_13.x) std::swap(v_23, v_13);
 
@@ -112,14 +112,14 @@ namespace PIRenderer {
 		if (v1.m_Position.y > v3.m_Position.y) std::swap(v1, v3);
 		if (v2.m_Position.y > v3.m_Position.y) std::swap(v2, v3);
 
-		Vector3 p1 = v1.m_Position;
-		Vector3 p2 = v2.m_Position;
-		Vector3 p3 = v3.m_Position;
+		Vector3f p1 = v1.m_Position;
+		Vector3f p2 = v2.m_Position;
+		Vector3f p3 = v3.m_Position;
 
-		int totalH = p3.y - p1.y;
+		float totalH = p3.y - p1.y;
 
 		//上三角形
-		for (int y = p1.y; y <= p2.y; y++)
+		for (int y = p1.y + 1; y <= p2.y; y++)
 		{
 			float halfH = p2.y - p1.y + 1e-8;
 
@@ -128,16 +128,17 @@ namespace PIRenderer {
 
 			Vertex v_12 = Vertex::Interpolate(v1, v2, t_12);
 			Vertex v_13 = Vertex::Interpolate(v1, v3, t_13);
-			Vector3 p_12 = v_12.m_Position;
-			Vector3 p_13 = v_13.m_Position;
+			Vector3f p_12 = v_12.m_Position;
+			Vector3f p_13 = v_13.m_Position;
 
 			if (p_12.x > p_13.x) std::swap(v_12, v_13);
+
 
 			DrawScanline(v_12, v_13);
 		}
 
 		//下三角形
-		for (int y = p2.y; y <= p3.y; y++)
+		for (int y = p2.y + 1; y <= p3.y; y++)
 		{
 			float halfH = p3.y - p2.y + 1e-8;
 
@@ -146,12 +147,32 @@ namespace PIRenderer {
 
 			Vertex v_23 = Vertex::Interpolate(v2, v3, t_23);
 			Vertex v_13 = Vertex::Interpolate(v1, v3, t_13);
-			Vector3 p_23 = v_23.m_Position;
-			Vector3 p_13 = v_13.m_Position;
+			Vector3f p_23 = v_23.m_Position;
+			Vector3f p_13 = v_13.m_Position;
 
 			if (p_23.x > p_13.x) std::swap(v_23, v_13);
 
 			DrawScanline(v_23, v_13);
+		}
+	}
+
+	void Renderer::DrawMesh(const Mesh& mesh)
+	{
+		const std::vector<Vertex>& vertexs = mesh.GetVertexBuffer();
+		
+		if (vertexs.size() == 0) return;
+
+		for (int i = 0; i < vertexs.size(); i += 3)
+		{
+			Vertex v1 = vertexs[i];
+			Vertex v2 = vertexs[i + 1];
+			Vertex v3 = vertexs[i + 2];
+
+			ProjectToScreenSpace(&v1.m_Position);
+			ProjectToScreenSpace(&v2.m_Position);
+			ProjectToScreenSpace(&v3.m_Position);
+
+			DrawTriangle(v1, v2, v3);
 		}
 	}
 	
@@ -164,5 +185,11 @@ namespace PIRenderer {
 	void Renderer::Clear()
 	{
 		memset(m_FramBuffer, 0, sizeof(uint32_t) * m_Width * m_Height);
+	}
+
+	void Renderer::ProjectToScreenSpace(Vector3f* pos)
+	{
+		pos->x = (pos->x + 1.0f) * 0.5f * m_Width;
+		pos->y = (1.0f - pos->y) * 0.5f * m_Height; //坐标反转了
 	}
 }

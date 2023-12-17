@@ -1,20 +1,19 @@
 #pragma once
-#include "PIMath.h"
+#include "Matrix.h"
 
 namespace PIRenderer {
 	class Vertex
 	{
 	public:
-		Vertex(const Vector3& pos, const Vector3& normal, float u, float v, const Vector3 color);
+		Vertex(const Vector3f& pos, const Vector3f& normal, const Vector2& texcoord, const Vector3f& color = {1, 1, 1});
 
 		static Vertex Interpolate(const Vertex& v1, const Vertex& v2, float t);
 
 	public:
-		Vector3 m_Position;
-		Vector3 m_Normal;
-		Vector3 m_Color;
-		float u;
-		float v;
+		Vector3f m_Position;
+		Vector3f m_Normal;
+		Vector3f m_Color;
+		Vector2 m_TexCoord;
 	};
 }
 

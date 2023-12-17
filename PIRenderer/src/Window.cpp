@@ -1,4 +1,6 @@
 #include "Window.h"
+#include "Mesh.h"
+#include <time.h>
 
 namespace PIRenderer {
 	Window::Window(int width, int height, const char* title)
@@ -15,12 +17,16 @@ namespace PIRenderer {
 		SDL_Log("Init successed!");
 
 		//创建窗口
-		m_Window = SDL_CreateWindow("PI Renderer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 600, 400, 0);
+		m_Window = SDL_CreateWindow("PI Renderer", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, width, height, 0);
 
 		//获取surface
 		m_Surface = SDL_GetWindowSurface(m_Window);
 
 		m_Canvas = new Renderer((uint32_t*)m_Surface->pixels, m_Width, m_Height);
+
+		//test
+		Mesh mesh("obj/african_head.obj");//注意相对路径时相对PIRenderer这个文件夹开始的
+		
 	}
 
 	Window::~Window()
@@ -40,20 +46,26 @@ namespace PIRenderer {
 
 	void Window::Run()
 	{
+		Mesh mesh("obj/african_head.obj");
+		double old_time = clock();
 		while (m_Running)
 		{
+			double time = clock();
+			//printf("time: %lf\n", time - old_time);
+			old_time = time;
 			//SDL_LockSurface(m_Surface);
 
 			OnEvent();
 
 			Clear();
 
-			Vector3 p1(100, 100, 0), p2(200, 100, 0), p3(350, 150, 0);
-			Vertex v1(p1, p1, 0, 0, {1, 0, 0});
-			Vertex v2(p2, p1, 0, 0, { 0, 1, 0 });
-			Vertex v3(p3, p1, 0, 0, { 0, 0, 1 });
+			Vector3f p1(100, 100, 0), p2(200, 100, 0), p3(350, 150, 0);
+			Vertex v1(p1, p1, { 0, 0 }, { 1, 0, 0 });
+			Vertex v2(p2, p1, { 0, 0 }, { 0, 1, 0 });
+			Vertex v3(p3, p1, { 0, 0 }, { 0, 0, 1 });
 
 			m_Canvas->DrawTriangle(v1, v2, v3);
+			m_Canvas->DrawMesh(mesh);
 
 			//SetPixel();
 			m_Canvas->SetRotationMatrix(0, 0, m_Rotation);
@@ -111,14 +123,5 @@ namespace PIRenderer {
 			start += 10;
 			m_Rotation -= 2;
 		}
-	}
-	void Window::SetPixel()
-	{
-		//修改内存颜色
-		for (int i = start; i < start + 200 && i < m_Height; i++)
-			for (int j = 0; j < 200; j++)
-			{
-				m_Canvas->SetPixel(i, j, {1, 1, 0}); //（A）RGB
-			}
 	}
 }

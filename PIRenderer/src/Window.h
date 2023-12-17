@@ -20,8 +20,6 @@ namespace PIRenderer {
 		void OnEvent();
 		void OnKeyEvent(const SDL_Event& event);
 
-		void SetPixel();
-
 	private:
 		int m_Width;
 		int m_Height;
@@ -35,7 +33,7 @@ namespace PIRenderer {
 
 		int start = 0;
 
-		float m_Rotation = -60;
+		float m_Rotation;
 
 	};
 }

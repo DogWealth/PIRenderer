@@ -1,7 +1,9 @@
 #pragma once
 #include <stdint.h>
-#include "PIMath.h"
+#include "Matrix.h"
 #include "Vertex.h"
+#include "Vector.h"
+#include "Mesh.h"
 namespace PIRenderer {
 	class Renderer
 	{
@@ -10,16 +12,21 @@ namespace PIRenderer {
 		~Renderer();
 
 		void SetPixel(int x, int y, uint32_t color);
-		void SetPixel(int x, int y, Vector3 color);
+		void SetPixel(int x, int y, Vector3f color);
 
-		void DrawTriangle(Vector3 v1, Vector3 v2, Vector3 v3, const Vector3& color);//scanline
+
+		void DrawTriangle(Vector3f v1, Vector3f v2, Vector3f v3, const Vector3f& color);//scanline
 
 		void DrawScanline(Vertex v1, Vertex v2);
 		void DrawTriangle(Vertex v1, Vertex v2, Vertex v3);//scanline
+		void DrawMesh(const Mesh& mesh);
 
 		void SetRotationMatrix(float yaw, float pitch, float roll);
 
 		void Clear();
+
+	private:
+		void ProjectToScreenSpace(Vector3f* pos);
 
 	private:
 		uint32_t* m_FramBuffer;
