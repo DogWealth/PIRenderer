@@ -5,7 +5,7 @@ namespace PIRenderer {
 	class Vertex
 	{
 	public:
-		Vertex(const Vector3f& pos, const Vector3f& normal, const Vector2& texcoord, const Vector3f& color = {1, 1, 1});
+		Vertex(const Vector3f& pos, const Vector3f& normal, const Vector2& texcoord, const Vector3f& color = {0.5, 0.5, 0.5});
 
 		static Vertex Interpolate(const Vertex& v1, const Vertex& v2, float t);
 

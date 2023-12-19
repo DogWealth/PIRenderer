@@ -137,24 +137,31 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\shader\BasicShader.cpp" />
+    <ClCompile Include="src\Shader.cpp" />
+    <ClCompile Include="src\Light.cpp" />
     <ClCompile Include="src\Mesh.cpp" />
     <ClCompile Include="src\Matrix.cpp" />
     <ClCompile Include="src\Renderer.cpp" />
     <ClCompile Include="src\EntryPoint.cpp" />
+    <ClCompile Include="src\TGAImage.cpp" />
     <ClCompile Include="src\Window.cpp" />
     <ClCompile Include="src\Vertex.cpp" />
     <ClCompile Include="src\Vector.cpp" />
+    <ClCompile Include="src\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\shader\BasicShader.h" />
+    <ClInclude Include="src\Shader.h" />
+    <ClInclude Include="src\Light.h" />
     <ClInclude Include="src\Mesh.h" />
     <ClInclude Include="src\Matrix.h" />
     <ClInclude Include="src\Renderer.h" />
+    <ClInclude Include="src\TGAImage.h" />
     <ClInclude Include="src\Window.h" />
     <ClInclude Include="src\Vertex.h" />
     <ClInclude Include="src\Vector.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="src\1.txt" />
+    <ClInclude Include="src\Texture.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

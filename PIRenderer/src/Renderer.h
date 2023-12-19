@@ -4,6 +4,8 @@
 #include "Vertex.h"
 #include "Vector.h"
 #include "Mesh.h"
+#include "Light.h"
+#include "Shader.h"
 namespace PIRenderer {
 	class Renderer
 	{
@@ -11,8 +13,8 @@ namespace PIRenderer {
 		Renderer(uint32_t* framBuffer, int width, int height);
 		~Renderer();
 
-		void SetPixel(int x, int y, uint32_t color);
-		void SetPixel(int x, int y, Vector3f color);
+		void SetPixel(int x, int y, float z, uint32_t color);
+		void SetPixel(int x, int y, float z, Vector3f color);
 
 
 		void DrawTriangle(Vector3f v1, Vector3f v2, Vector3f v3, const Vector3f& color);//scanline
@@ -30,6 +32,11 @@ namespace PIRenderer {
 
 	private:
 		uint32_t* m_FramBuffer;
+		float* m_DepthBuffer;
+
+		Shader* m_Shader;
+
+		DirectionLight m_DirectionLight;
 
 		Matrix4 m_RotationMatrix;
 

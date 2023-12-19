@@ -2,28 +2,39 @@
 #include <string>
 #include <algorithm>
 
-
 namespace PIRenderer {
 	Renderer::Renderer(uint32_t* framBuffer, int width, int height)
 		: m_FramBuffer(framBuffer), m_Width(width), m_Height(height)
 	{
 		m_RotationMatrix = Matrix4::Identity();
+		m_DepthBuffer = new float[width * height];
+
+		m_Shader = Shader::Create("BasicShader");
 	}
 
 	Renderer::~Renderer()
 	{
+		delete[] m_DepthBuffer;
+
+		delete m_Shader;
 	}
 
-	void Renderer::SetPixel(int x, int y, uint32_t color)
+	void Renderer::SetPixel(int x, int y, float z, uint32_t color)
 	{
 		if (x < 0 || x >= m_Width || y < 0 || y >= m_Height)
 			return;
 
 		int index = y * m_Width + x;
+		float depth = m_DepthBuffer[index];
+		if (depth > z)
+		{
+			return;
+		}
+		m_DepthBuffer[index] = z;
 		m_FramBuffer[index] = color;
 	}
 
-	void Renderer::SetPixel(int x, int y, Vector3f color)
+	void Renderer::SetPixel(int x, int y, float z, Vector3f color)
 	{
 		uint32_t A = 0.0f;
 		uint32_t R = (uint32_t)(color.x * 255.f);
@@ -32,7 +43,7 @@ namespace PIRenderer {
 
 		uint32_t Color = A | (R << 16) | (G << 8) | B;
 
-		SetPixel(x, y, Color);
+		SetPixel(x, y, z, Color);
 	}
 
 	void Renderer::DrawTriangle(Vector3f v1, Vector3f v2, Vector3f v3, const Vector3f& color)
@@ -45,10 +56,10 @@ namespace PIRenderer {
 		if (v1.y > v3.y) std::swap(v1, v3);
 		if (v2.y > v3.y) std::swap(v2, v3);
 
-		int totalH = v3.y - v1.y;
+		float totalH = v3.y - v1.y;
 
 		//上三角形
-		for (int y = v1.y; y <= v2.y; y++)
+		for (int y = v1.y + 1; y <= v2.y; y++)
 		{
 			float halfH = v2.y - v1.y + 1e-6;
 
@@ -62,12 +73,14 @@ namespace PIRenderer {
 
 			for (int x = v_12.x; x < v_13.x; x++)
 			{
-				SetPixel(x, y, color);
+				float t = (float)(x - v_12.x) / (v_13.x - v_12.x);
+				Vector3f v = Vector3f::Interpolate(v_12, v_13, t);
+				SetPixel(v.x, v.y, v.z, color);
 			}
 		}
 
 		//下三角形
-		for (int y = v2.y; y <= v3.y; y++)
+		for (int y = v2.y + 1; y <= v3.y; y++)
 		{
 			float halfH = v3.y - v2.y + 1e-6;
 
@@ -81,7 +94,9 @@ namespace PIRenderer {
 
 			for (int x = v_23.x; x < v_13.x; x++)
 			{
-				SetPixel(x, y, color);
+				float t = (float)(x - v_23.x) / (v_13.x - v_23.x);
+				Vector3f v = Vector3f::Interpolate(v_23, v_13, t);
+				SetPixel(v.x, v.y, v.z, color);
 			}
 		}
 	}
@@ -97,8 +112,9 @@ namespace PIRenderer {
 		{
 			float t = (float)(x - x1) / (x2 - x1);
 			Vertex v = Vertex::Interpolate(v1, v2, t);
+			m_Shader->FragmentShader(&v);
 
-			SetPixel(v.m_Position.x, v.m_Position.y, v.m_Color);
+			SetPixel(v.m_Position.x, v.m_Position.y, v.m_Position.z, v.m_Color);
 		}
 	}
 
@@ -133,7 +149,6 @@ namespace PIRenderer {
 
 			if (p_12.x > p_13.x) std::swap(v_12, v_13);
 
-
 			DrawScanline(v_12, v_13);
 		}
 
@@ -154,6 +169,7 @@ namespace PIRenderer {
 
 			DrawScanline(v_23, v_13);
 		}
+
 	}
 
 	void Renderer::DrawMesh(const Mesh& mesh)
@@ -167,6 +183,8 @@ namespace PIRenderer {
 			Vertex v1 = vertexs[i];
 			Vertex v2 = vertexs[i + 1];
 			Vertex v3 = vertexs[i + 2];
+
+			m_Shader->VertexShader(&v1, &v2, &v3);
 
 			ProjectToScreenSpace(&v1.m_Position);
 			ProjectToScreenSpace(&v2.m_Position);
@@ -185,6 +203,8 @@ namespace PIRenderer {
 	void Renderer::Clear()
 	{
 		memset(m_FramBuffer, 0, sizeof(uint32_t) * m_Width * m_Height);
+		std::fill(m_DepthBuffer, m_DepthBuffer + m_Width * m_Height, -FLT_MAX);
+
 	}
 
 	void Renderer::ProjectToScreenSpace(Vector3f* pos)

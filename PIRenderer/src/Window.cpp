@@ -25,7 +25,7 @@ namespace PIRenderer {
 		m_Canvas = new Renderer((uint32_t*)m_Surface->pixels, m_Width, m_Height);
 
 		//test
-		Mesh mesh("obj/african_head.obj");//注意相对路径时相对PIRenderer这个文件夹开始的
+		m_Mesh = new Mesh("obj/african_head.obj");//注意相对路径时相对PIRenderer这个文件夹开始的
 		
 	}
 
@@ -42,16 +42,17 @@ namespace PIRenderer {
 		SDL_Log("Quit!");
 
 		delete m_Canvas;
+
+		delete m_Mesh;
 	}
 
 	void Window::Run()
 	{
-		Mesh mesh("obj/african_head.obj");
 		double old_time = clock();
 		while (m_Running)
 		{
 			double time = clock();
-			//printf("time: %lf\n", time - old_time);
+			//printf("FPS: %lf\n", 1000 / (time - old_time));
 			old_time = time;
 			//SDL_LockSurface(m_Surface);
 
@@ -59,13 +60,14 @@ namespace PIRenderer {
 
 			Clear();
 
-			Vector3f p1(100, 100, 0), p2(200, 100, 0), p3(350, 150, 0);
+			Vector3f p1(100, 300, 100), p2(200, 300, 0), p3(350, 250, -10);
 			Vertex v1(p1, p1, { 0, 0 }, { 1, 0, 0 });
 			Vertex v2(p2, p1, { 0, 0 }, { 0, 1, 0 });
 			Vertex v3(p3, p1, { 0, 0 }, { 0, 0, 1 });
 
-			m_Canvas->DrawTriangle(v1, v2, v3);
-			m_Canvas->DrawMesh(mesh);
+			//m_Canvas->DrawTriangle(v1, v2, v3);
+			m_Canvas->DrawMesh(*m_Mesh);
+			//m_Canvas->DrawTriangle(v1, v2, v3);
 
 			//SetPixel();
 			m_Canvas->SetRotationMatrix(0, 0, m_Rotation);

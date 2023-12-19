@@ -31,6 +31,8 @@ namespace PIRenderer {
 
 		Renderer* m_Canvas;
 
+		Mesh* m_Mesh;
+
 		int start = 0;
 
 		float m_Rotation;
