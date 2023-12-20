@@ -14,6 +14,11 @@ namespace PIRenderer {
 
 		void Run();
 
+		void SetRenderer(Renderer* renderer);
+		SDL_Surface* GetSurface();
+
+	private:
+
 		void Render();
 		void Clear();
 
@@ -29,9 +34,7 @@ namespace PIRenderer {
 		SDL_Surface* m_Surface;
 		SDL_Window* m_Window;
 
-		Renderer* m_Canvas;
-
-		Mesh* m_Mesh;
+		Renderer* m_Renderer;
 
 		int start = 0;
 

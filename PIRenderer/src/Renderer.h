@@ -14,27 +14,41 @@ namespace PIRenderer {
 		~Renderer();
 
 		void SetPixel(int x, int y, float z, uint32_t color);
-		void SetPixel(int x, int y, float z, Vector3f color);
+		void SetPixel(int x, int y, float z, const Vector3f& color);
 
 
 		void DrawTriangle(Vector3f v1, Vector3f v2, Vector3f v3, const Vector3f& color);//scanline
 
-		void DrawScanline(Vertex v1, Vertex v2);
-		void DrawTriangle(Vertex v1, Vertex v2, Vertex v3);//scanline
-		void DrawMesh(const Mesh& mesh);
+		void DrawLine(Vertex* v1, Vertex* v2);
+		void DrawScanline(Vertex* v, Vertex* v1, Vertex* v2);
+
+		void DrawTriangleLine(Vertex* v1, Vertex* v2, Vertex* v3);
+		void DrawTriangle(Vertex* v1, Vertex* v2, Vertex* v3);//scanline
+
+		void DrawMeshLine(Mesh* mesh);
+		void DrawMesh(Mesh* mesh);
+
+		void DrawMeshLines();
+		void DrawMeshs();
+
+		void BindShader(Shader* shader);
 
 		void SetRotationMatrix(float yaw, float pitch, float roll);
 
 		void Clear();
 
+		void AddMesh(Mesh* mesh);
+
 	private:
-		void ProjectToScreenSpace(Vector3f* pos);
+		void ViewPort(Vector3f* pos);
 
 	private:
 		uint32_t* m_FramBuffer;
 		float* m_DepthBuffer;
 
 		Shader* m_Shader;
+
+		std::vector<Mesh*> m_Meshs;
 
 		DirectionLight m_DirectionLight;
 

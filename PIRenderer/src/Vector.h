@@ -45,6 +45,7 @@ namespace PIRenderer {
 
 		//²åÖµ
 		static Vector3<T> Interpolate(const Vector3<T>& v1, const Vector3<T>& v2, float t);
+		static Vector3<T>* Interpolate(Vector3<T>* v, const Vector3<T>& v1, const Vector3<T>& v2, float t);
 
 
 	public:
@@ -229,10 +230,19 @@ namespace PIRenderer {
 	}
 
 	template<class T>
-	Vector3<T> Vector3<T>::Interpolate(const Vector3<T>& v1, const Vector3<T>& v2, float t)
+	inline Vector3<T> Vector3<T>::Interpolate(const Vector3<T>& v1, const Vector3<T>& v2, float t)
 	{
 
 		return v1 + (v2 - v1) * t;
+	}
+
+	template<class T>
+	inline Vector3<T>* Vector3<T>::Interpolate(Vector3<T>* v, const Vector3<T>& v1, const Vector3<T>& v2, float t)
+	{
+		v->x = v1.x + (v2.x - v1.x) * t;
+		v->y = v1.y + (v2.y - v1.y) * t;
+		v->z = v1.z + (v2.z - v1.z) * t;
+		return v;
 	}
 
 	template<class T>
@@ -278,6 +288,14 @@ namespace PIRenderer {
 		{
 			return v1 + (v2 - v1) * t;
 		}
+		static Vector2* Interpolate(Vector2* v, const Vector2& v1, const Vector2& v2, float t)
+		{
+			v->u = v1.u + (v2.u - v1.u) * t;
+			v->v = v1.v + (v2.v - v1.v) * t;
+			
+			return v;
+		}
+
 
 	public:
 		float u, v;

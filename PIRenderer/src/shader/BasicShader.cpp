@@ -19,19 +19,15 @@ namespace PIRenderer {
 
 	void BasicShader::FragmentShader(Vertex* v)
 	{
-		Vector3f n = v->m_Normal;
-		n.Normalize();
+		v->m_Normal.Normalize();
 
 		float intensity = m_DirectionLight.GetIntensity();
-		Vector3f dir = m_DirectionLight.GetDirection();
 
-		intensity = n * dir;
+		intensity = v->m_Normal * m_DirectionLight.GetDirection();
 
 		intensity = intensity > 0 ? intensity : 0.f;
 
-		Vector3f color = m_Texture->Sample(v->m_TexCoord.u, v->m_TexCoord.v);
-
-		v->m_Color = color * intensity;
+		v->m_Color = m_Texture->Sample(v->m_TexCoord.u, v->m_TexCoord.v) * intensity;
 	}
 
 }

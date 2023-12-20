@@ -22,10 +22,9 @@ namespace PIRenderer {
 		//获取surface
 		m_Surface = SDL_GetWindowSurface(m_Window);
 
-		m_Canvas = new Renderer((uint32_t*)m_Surface->pixels, m_Width, m_Height);
+		m_Renderer = nullptr;
 
 		//test
-		m_Mesh = new Mesh("obj/african_head.obj");//注意相对路径时相对PIRenderer这个文件夹开始的
 		
 	}
 
@@ -40,10 +39,6 @@ namespace PIRenderer {
 		SDL_Quit();
 
 		SDL_Log("Quit!");
-
-		delete m_Canvas;
-
-		delete m_Mesh;
 	}
 
 	void Window::Run()
@@ -52,7 +47,7 @@ namespace PIRenderer {
 		while (m_Running)
 		{
 			double time = clock();
-			//printf("FPS: %lf\n", 1000 / (time - old_time));
+			printf("FPS: %lf\n", 1000 / (time - old_time));
 			old_time = time;
 			//SDL_LockSurface(m_Surface);
 
@@ -60,27 +55,28 @@ namespace PIRenderer {
 
 			Clear();
 
-			Vector3f p1(100, 300, 100), p2(200, 300, 0), p3(350, 250, -10);
-			Vertex v1(p1, p1, { 0, 0 }, { 1, 0, 0 });
-			Vertex v2(p2, p1, { 0, 0 }, { 0, 1, 0 });
-			Vertex v3(p3, p1, { 0, 0 }, { 0, 0, 1 });
-
-			//m_Canvas->DrawTriangle(v1, v2, v3);
-			m_Canvas->DrawMesh(*m_Mesh);
-			//m_Canvas->DrawTriangle(v1, v2, v3);
-
-			//SetPixel();
-			m_Canvas->SetRotationMatrix(0, 0, m_Rotation);
-			//m_Canvas->DrawTriangle({ 100, 100, 0 }, { 100, 200, 0 }, { 350, 150, 0 }, { 1, 0, 0 });
-			//m_Canvas->DrawTriangle({ 77.024323, 118.605453, 0 }, { 56.23377, 216.420349, 0 }, { 311.166260, 219.489319, 0 }, { 1, 0, 0 });
-
 			Render();
 		}
+	}
+
+	void Window::SetRenderer(Renderer* renderer)
+	{
+		m_Renderer = renderer;
+	}
+
+	SDL_Surface* Window::GetSurface()
+	{
+		return m_Surface;
 	}
 
 	void Window::Render()
 	{
 		//SDL_UnlockSurface(m_Surface);
+
+		m_Renderer->DrawMeshs();
+		//m_Renderer->DrawMeshLines();
+
+		m_Renderer->SetRotationMatrix(0, 0, m_Rotation);
 
 		//将绘制内容跟新到屏幕上
 		SDL_UpdateWindowSurface(m_Window);
@@ -88,7 +84,7 @@ namespace PIRenderer {
 
 	void Window::Clear()
 	{
-		m_Canvas->Clear();
+		m_Renderer->Clear();
 	}
 
 	void Window::OnEvent()

@@ -1,7 +1,7 @@
 #include "Renderer.h"
 #include <string>
 #include <algorithm>
-
+#include <time.h>
 namespace PIRenderer {
 	Renderer::Renderer(uint32_t* framBuffer, int width, int height)
 		: m_FramBuffer(framBuffer), m_Width(width), m_Height(height)
@@ -9,14 +9,12 @@ namespace PIRenderer {
 		m_RotationMatrix = Matrix4::Identity();
 		m_DepthBuffer = new float[width * height];
 
-		m_Shader = Shader::Create("BasicShader");
+		m_Shader = nullptr;
 	}
 
 	Renderer::~Renderer()
 	{
 		delete[] m_DepthBuffer;
-
-		delete m_Shader;
 	}
 
 	void Renderer::SetPixel(int x, int y, float z, uint32_t color)
@@ -34,7 +32,7 @@ namespace PIRenderer {
 		m_FramBuffer[index] = color;
 	}
 
-	void Renderer::SetPixel(int x, int y, float z, Vector3f color)
+	void Renderer::SetPixel(int x, int y, float z, const Vector3f& color)
 	{
 		uint32_t A = 0.0f;
 		uint32_t R = (uint32_t)(color.x * 255.f);
@@ -101,40 +99,96 @@ namespace PIRenderer {
 		}
 	}
 
-	void Renderer::DrawScanline(Vertex v1, Vertex v2)
+	void Renderer::DrawLine(Vertex* v1, Vertex* v2)
 	{
-		if (v1.m_Position.x > v2.m_Position.x)
-			std::swap(v1, v2);
+		int x1 = (int)v1->m_Position.x;
+		int y1 = (int)v1->m_Position.y;
+		int x2 = (int)v2->m_Position.x;
+		int y2 = (int)v2->m_Position.y;
 
-		int x1 = v1.m_Position.x;
-		int x2 = v2.m_Position.x;
-		for (int x = x1; x < x2; x++)
-		{
-			float t = (float)(x - x1) / (x2 - x1);
-			Vertex v = Vertex::Interpolate(v1, v2, t);
-			m_Shader->FragmentShader(&v);
+		// delta x and delta y
+		int dx = x2 - x1;
+		int dy = y2 - y1;
 
-			SetPixel(v.m_Position.x, v.m_Position.y, v.m_Position.z, v.m_Color);
+		if (abs(dx) > abs(dy)) {
+			int sign = x2 - x1 > 0 ? 1 : -1;
+			float ratio = 0;
+			if (dx != 0) {
+				ratio = (float)dy / dx;
+			}
+
+			for (int x = x1; x != x2; x += sign) {
+				int y = y1 + (x - x1) * ratio;
+				
+				SetPixel(x, y, 0, { 1, 1, 1 });
+			}
+		}
+		else {
+			int sign = y2 - y1 > 0 ? 1 : -1;
+			float ratio = 0;
+			if (dy != 0) {
+				ratio = (float)dx / dy;
+			}
+
+			for (int y = y1; y != y2; y += sign) {
+				int x = x1 + (y - y1) * ratio;
+				SetPixel(x, y, 0, { 1, 1, 1 });
+			}
 		}
 	}
 
-	void Renderer::DrawTriangle(Vertex v1, Vertex v2, Vertex v3)
+	void Renderer::DrawScanline(Vertex* v, Vertex* v1, Vertex* v2)
 	{
-		v1.m_Position = v1.m_Position * m_RotationMatrix;
-		v2.m_Position = v2.m_Position * m_RotationMatrix;
-		v3.m_Position = v3.m_Position * m_RotationMatrix;
+		if (v1->m_Position.x > v2->m_Position.x)
+			std::swap(v1, v2);
 
-		if (v1.m_Position.y > v2.m_Position.y) std::swap(v1, v2);
-		if (v1.m_Position.y > v3.m_Position.y) std::swap(v1, v3);
-		if (v2.m_Position.y > v3.m_Position.y) std::swap(v2, v3);
+		int x1 = v1->m_Position.x;
+		int x2 = v2->m_Position.x;
 
-		Vector3f p1 = v1.m_Position;
-		Vector3f p2 = v2.m_Position;
-		Vector3f p3 = v3.m_Position;
+		for (int x = x1; x < x2; x++)
+		{
+			float t = (float)(x - x1) / (x2 - x1);
+			Vertex::Interpolate(v, *v1, *v2, t);
+			m_Shader->FragmentShader(v);
+
+			SetPixel(v->m_Position.x, v->m_Position.y, v->m_Position.z, v->m_Color);
+		}
+	}
+
+	void Renderer::DrawTriangleLine(Vertex* v1, Vertex* v2, Vertex* v3)
+	{
+		v1->m_Position = v1->m_Position * m_RotationMatrix;
+		v2->m_Position = v2->m_Position * m_RotationMatrix;
+		v3->m_Position = v3->m_Position * m_RotationMatrix;
+
+		DrawLine(v1, v2);
+		DrawLine(v1, v3);
+		DrawLine(v2, v3);
+	}
+
+	void Renderer::DrawTriangle(Vertex* v1, Vertex* v2, Vertex* v3)
+	{
+		v1->m_Position = v1->m_Position * m_RotationMatrix;
+		v2->m_Position = v2->m_Position * m_RotationMatrix;
+		v3->m_Position = v3->m_Position * m_RotationMatrix;
+
+		if (v1->m_Position.y > v2->m_Position.y) std::swap(v1, v2);
+		if (v1->m_Position.y > v3->m_Position.y) std::swap(v1, v3);
+		if (v2->m_Position.y > v3->m_Position.y) std::swap(v2, v3);
+
+		Vector3f p1 = v1->m_Position;
+		Vector3f p2 = v2->m_Position;
+		Vector3f p3 = v3->m_Position;
 
 		float totalH = p3.y - p1.y;
 
 		//上三角形
+		Vertex v_12;
+		Vertex v_13;
+		Vertex v_23;
+		Vertex v;
+
+
 		for (int y = p1.y + 1; y <= p2.y; y++)
 		{
 			float halfH = p2.y - p1.y + 1e-8;
@@ -142,40 +196,37 @@ namespace PIRenderer {
 			float t_12 = (float)(y - p1.y) / halfH;
 			float t_13 = (float)(y - p1.y) / totalH;
 
-			Vertex v_12 = Vertex::Interpolate(v1, v2, t_12);
-			Vertex v_13 = Vertex::Interpolate(v1, v3, t_13);
-			Vector3f p_12 = v_12.m_Position;
-			Vector3f p_13 = v_13.m_Position;
+			Vertex::Interpolate(&v_12, *v1, *v2, t_12);
+			Vertex::Interpolate(&v_13, *v1, *v3, t_13);
 
-			if (p_12.x > p_13.x) std::swap(v_12, v_13);
+			if (v_12.m_Position.x > v_13.m_Position.x) std::swap(v_12, v_13);
 
-			DrawScanline(v_12, v_13);
+			DrawScanline(&v, &v_12, &v_13);
 		}
 
 		//下三角形
 		for (int y = p2.y + 1; y <= p3.y; y++)
 		{
 			float halfH = p3.y - p2.y + 1e-8;
-
 			float t_23 = (float)(y - p2.y) / halfH;
 			float t_13 = (float)(y - p1.y) / totalH;
 
-			Vertex v_23 = Vertex::Interpolate(v2, v3, t_23);
-			Vertex v_13 = Vertex::Interpolate(v1, v3, t_13);
-			Vector3f p_23 = v_23.m_Position;
-			Vector3f p_13 = v_13.m_Position;
 
-			if (p_23.x > p_13.x) std::swap(v_23, v_13);
+			Vertex::Interpolate(&v_23, *v2, *v3, t_23);
+			Vertex::Interpolate(&v_13, *v1, *v3, t_13);
 
-			DrawScanline(v_23, v_13);
+
+			if (v_23.m_Position.x > v_13.m_Position.x) std::swap(v_23, v_13);
+
+			DrawScanline(&v, &v_23, &v_13);
 		}
 
 	}
 
-	void Renderer::DrawMesh(const Mesh& mesh)
+	void Renderer::DrawMeshLine(Mesh* mesh)
 	{
-		const std::vector<Vertex>& vertexs = mesh.GetVertexBuffer();
-		
+		const std::vector<Vertex>& vertexs = mesh->GetVertexBuffer();
+
 		if (vertexs.size() == 0) return;
 
 		for (int i = 0; i < vertexs.size(); i += 3)
@@ -184,14 +235,59 @@ namespace PIRenderer {
 			Vertex v2 = vertexs[i + 1];
 			Vertex v3 = vertexs[i + 2];
 
+			ViewPort(&v1.m_Position);
+			ViewPort(&v2.m_Position);
+			ViewPort(&v3.m_Position);
+
+			DrawTriangleLine(&v1, &v2, &v3);
+		}
+
+	}
+
+	void Renderer::DrawMesh(Mesh* mesh)
+	{
+		const std::vector<Vertex>& vertexs = mesh->GetVertexBuffer();
+		
+		if (vertexs.size() == 0) return;
+
+		double time1 = clock();
+		for (int i = 0; i < vertexs.size(); i += 3)
+		{
+			Vertex v1 = vertexs[i];
+			Vertex v2 = vertexs[i + 1];
+			Vertex v3 = vertexs[i + 2];
+
 			m_Shader->VertexShader(&v1, &v2, &v3);
 
-			ProjectToScreenSpace(&v1.m_Position);
-			ProjectToScreenSpace(&v2.m_Position);
-			ProjectToScreenSpace(&v3.m_Position);
+			ViewPort(&v1.m_Position);
+			ViewPort(&v2.m_Position);
+			ViewPort(&v3.m_Position);
 
-			DrawTriangle(v1, v2, v3);
+			DrawTriangle(&v1, &v2, &v3);
 		}
+		double time2 = clock();
+		//printf("FPS: %lf\n", 1000 / (time2 - time1));
+	}
+
+	void Renderer::DrawMeshLines()
+	{
+		for (auto mesh : m_Meshs)
+		{
+			DrawMeshLine(mesh);
+		}
+	}
+
+	void Renderer::DrawMeshs()
+	{
+		for (auto mesh : m_Meshs)
+		{
+			DrawMesh(mesh);
+		}
+	}
+
+	void Renderer::BindShader(Shader* shader)
+	{
+		m_Shader = shader;
 	}
 	
 
@@ -207,7 +303,12 @@ namespace PIRenderer {
 
 	}
 
-	void Renderer::ProjectToScreenSpace(Vector3f* pos)
+	void Renderer::AddMesh(Mesh* mesh)
+	{
+		m_Meshs.push_back(mesh);
+	}
+
+	void Renderer::ViewPort(Vector3f* pos)
 	{
 		pos->x = (pos->x + 1.0f) * 0.5f * m_Width;
 		pos->y = (1.0f - pos->y) * 0.5f * m_Height; //坐标反转了
