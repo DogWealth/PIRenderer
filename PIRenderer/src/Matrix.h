@@ -11,6 +11,7 @@ namespace PIRenderer {
 
 		static Matrix4 Identity();
 		static Matrix4 Zero();
+		static Matrix4 Transpose(const Matrix4& m);
 
 		static Matrix4 Translate(float x, float y, float z);
 
@@ -21,6 +22,9 @@ namespace PIRenderer {
 		static Matrix4 RotateZ(float roll);
 		static Matrix4 RotateEuler(float roll, float pitch, float yaw);
 		static Matrix4 Rotate(float x, float y, float z, float theta);
+
+		static Matrix4 LookAt(const Vector3f& eyePos, const Vector3f& lookAt, const Vector3f& upAxis);
+		static Matrix4 Orthographic(float l, float r, float b, float t, float f, float n);
 	public:
 		float m_Mat[4][4];
 	};

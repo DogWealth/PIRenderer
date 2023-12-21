@@ -6,6 +6,8 @@
 #include "Mesh.h"
 #include "Light.h"
 #include "Shader.h"
+#include "Camera.h"
+#include "CameraController.h"
 namespace PIRenderer {
 	class Renderer
 	{
@@ -33,7 +35,6 @@ namespace PIRenderer {
 
 		void BindShader(Shader* shader);
 
-		void SetRotationMatrix(float yaw, float pitch, float roll);
 
 		void Clear();
 
@@ -51,8 +52,6 @@ namespace PIRenderer {
 		std::vector<Mesh*> m_Meshs;
 
 		DirectionLight m_DirectionLight;
-
-		Matrix4 m_RotationMatrix;
 
 		int m_Width;
 		int m_Height;

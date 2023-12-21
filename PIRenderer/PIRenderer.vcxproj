@@ -112,7 +112,8 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <Optimization>Disabled</Optimization>
+      <Optimization>MaxSpeed</Optimization>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -138,6 +139,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\Application.cpp" />
+    <ClCompile Include="src\CameraController.cpp" />
+    <ClCompile Include="src\Camera.cpp" />
+    <ClCompile Include="src\Input.cpp" />
     <ClCompile Include="src\shader\BasicShader.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Light.cpp" />
@@ -152,6 +157,10 @@
     <ClCompile Include="src\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\Application.h" />
+    <ClInclude Include="src\CameraController.h" />
+    <ClInclude Include="src\Camera.h" />
+    <ClInclude Include="src\Input.h" />
     <ClInclude Include="src\shader\BasicShader.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\Light.h" />

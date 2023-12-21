@@ -43,6 +43,32 @@ namespace PIRenderer {
 		return m;
 	}
 
+	Matrix4 Matrix4::Transpose(const Matrix4& m)
+	{
+		Matrix4 mat4;
+		mat4.m_Mat[0][0] = m.m_Mat[0][0];
+		mat4.m_Mat[0][1] = m.m_Mat[1][0];
+		mat4.m_Mat[0][2] = m.m_Mat[2][0];
+		mat4.m_Mat[0][3] = m.m_Mat[3][0];
+
+		mat4.m_Mat[1][0] = m.m_Mat[0][1];
+		mat4.m_Mat[1][1] = m.m_Mat[1][1];
+		mat4.m_Mat[1][2] = m.m_Mat[2][1];
+		mat4.m_Mat[1][3] = m.m_Mat[3][1];
+
+		mat4.m_Mat[2][0] = m.m_Mat[0][2];
+		mat4.m_Mat[2][1] = m.m_Mat[1][2];
+		mat4.m_Mat[2][2] = m.m_Mat[2][2];
+		mat4.m_Mat[2][3] = m.m_Mat[3][2];
+
+		mat4.m_Mat[3][0] = m.m_Mat[0][3];
+		mat4.m_Mat[3][1] = m.m_Mat[1][3];
+		mat4.m_Mat[3][2] = m.m_Mat[2][3];
+		mat4.m_Mat[3][3] = m.m_Mat[3][3];
+
+		return mat4;
+	}
+
 	Matrix4 Matrix4::Translate(float x, float y, float z)
 	{
 		Matrix4 m = Matrix4::Identity();
@@ -124,6 +150,67 @@ namespace PIRenderer {
 		m.m_Mat[2][2] = 1 - 2 * x * x - 2 * y * y;
 
 		return m;
+	}
+
+	Matrix4 Matrix4::LookAt(const Vector3f& eyePos, const Vector3f& lookAt, const Vector3f& upAxis)
+	{
+		Vector3f lookDir = lookAt;
+		lookDir.Normalize();
+
+		Vector3f rightDir = Vector3f::CrossProduct(upAxis, lookDir);
+		rightDir.Normalize();
+
+		Vector3f upDir = Vector3f::CrossProduct(lookDir, rightDir);
+		upDir.Normalize();
+
+		Matrix4 mat4;
+		mat4.m_Mat[0][0] = rightDir.x;
+		mat4.m_Mat[0][1] = rightDir.y;
+		mat4.m_Mat[0][2] = rightDir.z;
+		mat4.m_Mat[0][3] = -eyePos.x;
+
+		mat4.m_Mat[1][0] = upDir.x;
+		mat4.m_Mat[1][1] = upDir.y;
+		mat4.m_Mat[1][2] = upDir.z;
+		mat4.m_Mat[1][3] = -eyePos.y;
+
+		mat4.m_Mat[2][0] = lookDir.x;
+		mat4.m_Mat[2][1] = lookDir.y;
+		mat4.m_Mat[2][2] = lookDir.z;
+		mat4.m_Mat[2][3] = -eyePos.z;
+
+		mat4.m_Mat[3][0] = 0;
+		mat4.m_Mat[3][1] = 0;
+		mat4.m_Mat[3][2] = 0;
+		mat4.m_Mat[3][3] = 1;
+
+		return mat4;
+	}
+
+	Matrix4 Matrix4::Orthographic(float l, float r, float b, float t, float f, float n)
+	{
+		Matrix4 mat4;
+		mat4.m_Mat[0][0] = 2 / (r - l);
+		mat4.m_Mat[0][1] = 0;
+		mat4.m_Mat[0][2] = 0;
+		mat4.m_Mat[0][3] = 0;
+
+		mat4.m_Mat[1][0] = 0;
+		mat4.m_Mat[1][1] = 2 / (t - b);
+		mat4.m_Mat[1][2] = 0;
+		mat4.m_Mat[1][3] = 0;
+
+		mat4.m_Mat[2][0] = 0;
+		mat4.m_Mat[2][1] = 0;
+		mat4.m_Mat[2][2] = 2 / (n - f);
+		mat4.m_Mat[2][3] = 0;
+
+		mat4.m_Mat[3][0] = -(r + l) / (r - l);
+		mat4.m_Mat[3][1] = -(t + b) / (t - b);
+		mat4.m_Mat[3][2] = -(n + f) / (n - f);
+		mat4.m_Mat[3][3] = 1;
+
+		return mat4;
 	}
 
 	Matrix4 operator+(const Matrix4& m1, const Matrix4& m2)

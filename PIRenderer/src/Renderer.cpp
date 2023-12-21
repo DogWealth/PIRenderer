@@ -6,7 +6,6 @@ namespace PIRenderer {
 	Renderer::Renderer(uint32_t* framBuffer, int width, int height)
 		: m_FramBuffer(framBuffer), m_Width(width), m_Height(height)
 	{
-		m_RotationMatrix = Matrix4::Identity();
 		m_DepthBuffer = new float[width * height];
 
 		m_Shader = nullptr;
@@ -46,10 +45,6 @@ namespace PIRenderer {
 
 	void Renderer::DrawTriangle(Vector3f v1, Vector3f v2, Vector3f v3, const Vector3f& color)
 	{
-		v1 = v1 * m_RotationMatrix;
-		v2 = v2 * m_RotationMatrix;
-		v3 = v3 * m_RotationMatrix;
-
 		if (v1.y > v2.y) std::swap(v1, v2);
 		if (v1.y > v3.y) std::swap(v1, v3);
 		if (v2.y > v3.y) std::swap(v2, v3);
@@ -157,10 +152,6 @@ namespace PIRenderer {
 
 	void Renderer::DrawTriangleLine(Vertex* v1, Vertex* v2, Vertex* v3)
 	{
-		v1->m_Position = v1->m_Position * m_RotationMatrix;
-		v2->m_Position = v2->m_Position * m_RotationMatrix;
-		v3->m_Position = v3->m_Position * m_RotationMatrix;
-
 		DrawLine(v1, v2);
 		DrawLine(v1, v3);
 		DrawLine(v2, v3);
@@ -168,10 +159,6 @@ namespace PIRenderer {
 
 	void Renderer::DrawTriangle(Vertex* v1, Vertex* v2, Vertex* v3)
 	{
-		v1->m_Position = v1->m_Position * m_RotationMatrix;
-		v2->m_Position = v2->m_Position * m_RotationMatrix;
-		v3->m_Position = v3->m_Position * m_RotationMatrix;
-
 		if (v1->m_Position.y > v2->m_Position.y) std::swap(v1, v2);
 		if (v1->m_Position.y > v3->m_Position.y) std::swap(v1, v3);
 		if (v2->m_Position.y > v3->m_Position.y) std::swap(v2, v3);
@@ -290,11 +277,6 @@ namespace PIRenderer {
 		m_Shader = shader;
 	}
 	
-
-	void Renderer::SetRotationMatrix(float yaw, float pitch, float roll)
-	{
-		m_RotationMatrix = Matrix4::RotateEuler(yaw, pitch, roll);
-	}
 
 	void Renderer::Clear()
 	{

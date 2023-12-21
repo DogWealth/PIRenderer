@@ -245,11 +245,28 @@ bool TGAImage::unload_rle_data(std::ofstream &out) {
     return true;
 }
 
-TGAColor TGAImage::get(int x, int y) {
+TGAColor& TGAImage::get(int x, int y) {
     if (!data || x<0 || y<0 || x>=width || y>=height) {
+        m_TGAColor.bgra[0] = 0;
+        m_TGAColor.bgra[1] = 0;
+        m_TGAColor.bgra[2] = 0;
+        m_TGAColor.bgra[3] = 0;
+    }
+    else
+    {
+        for (int i = 0; i < (int)bytespp; i++) {
+            m_TGAColor.bgra[i] = (data + (x + y * width) * bytespp)[i];
+        }
+        for (int i = bytespp; i < 4; i++) {
+            m_TGAColor.bgra[i] = 0;
+        }
+    }
+    return m_TGAColor;
+
+    /*if (!data || x < 0 || y < 0 || x >= width || y >= height) {
         return TGAColor();
     }
-    return TGAColor(data+(x+y*width)*bytespp, bytespp);
+    return TGAColor(data + (x + y * width) * bytespp, bytespp);*/
 }
 
 bool TGAImage::set(int x, int y, TGAColor &c) {

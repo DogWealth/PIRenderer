@@ -146,6 +146,7 @@ namespace PIRenderer {
 		return Vector3<T>(x * k, y * k, z * k);
 	}
 
+
 	template<class T>
 	Vector3<T> Vector3<T>::operator/(float k) const
 	{
@@ -178,6 +179,7 @@ namespace PIRenderer {
 	{
 		return x * vector.x + y * vector.y + z * vector.z;
 	}
+
 
 	template<class T>
 	void Vector3<T>::Zero()

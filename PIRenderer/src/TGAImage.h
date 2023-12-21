@@ -72,6 +72,8 @@ protected:
 
     bool   load_rle_data(std::ifstream &in);
     bool unload_rle_data(std::ofstream &out);
+
+    TGAColor m_TGAColor;
 public:
     enum Format {
         GRAYSCALE=1, RGB=3, RGBA=4
@@ -85,7 +87,7 @@ public:
     bool flip_horizontally();
     bool flip_vertically();
     bool scale(int w, int h);
-    TGAColor get(int x, int y);
+    TGAColor& get(int x, int y);
     bool set(int x, int y, TGAColor &c);
     bool set(int x, int y, const TGAColor &c);
     ~TGAImage();

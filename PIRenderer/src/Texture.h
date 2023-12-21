@@ -11,10 +11,12 @@ namespace PIRenderer {
 		~Texture();
 
 		void LoadTexture(const std::string& filepath);
-		Vector3f Sample(float u, float v) const;
+		Vector3f* Sample(float u, float v);
 
 	private:
 		TGAImage* m_TGAImage;
+		Vector3f* m_TextureColor;
+		TGAColor m_TAGColor;
 		int m_Width;
 		int m_Height;
 	};
