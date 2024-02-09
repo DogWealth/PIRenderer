@@ -134,10 +134,10 @@ namespace PIRenderer {
 		Vector3f v(x, y, z);
 		v.Normalize();
 		
-		float w = cos(PI * theta / 2 * 180.0f);
-		x = v.x * sin(PI * theta / 2 * 180.0f);
-		y = v.y * sin(PI * theta / 2 * 180.0f);
-		z = v.z * sin(PI * theta / 2 * 180.0f);
+		float w = cos(PI * theta / (2 * 180.0f));
+		x = v.x * sin(PI * theta / (2 * 180.0f));
+		y = v.y * sin(PI * theta / (2 * 180.0f));
+		z = v.z * sin(PI * theta / (2 * 180.0f));
 
 		m.m_Mat[0][0] = 1 - 2 * y * y - 2 * z * z;
 		m.m_Mat[1][0] = 2 * x * y - 2 * w * z;
@@ -207,11 +207,46 @@ namespace PIRenderer {
 
 		mat4.m_Mat[3][0] = -(r + l) / (r - l);
 		mat4.m_Mat[3][1] = -(t + b) / (t - b);
-		mat4.m_Mat[3][2] = -(n + f) / (n - f);
+		mat4.m_Mat[3][2] = (n + f) / (n - f);
 		mat4.m_Mat[3][3] = 1;
 
 		return mat4;
 	}
+
+	Matrix4 Matrix4::Perspective(float n, float f, float fov, float aspectRatio)
+	{
+		float t = tan(PI * fov / (2 * 180)) * n;
+		float b = -t;
+		float r = t * aspectRatio;
+		float l = -r;
+
+		Matrix4 mat4;
+		mat4.m_Mat[0][0] = n;
+		mat4.m_Mat[0][1] = 0;
+		mat4.m_Mat[0][2] = 0;
+		mat4.m_Mat[0][3] = 0;
+
+		mat4.m_Mat[1][0] = 0;
+		mat4.m_Mat[1][1] = n;
+		mat4.m_Mat[1][2] = 0;
+		mat4.m_Mat[1][3] = 0;
+
+		mat4.m_Mat[2][0] = 0;
+		mat4.m_Mat[2][1] = 0;
+		mat4.m_Mat[2][2] = f + n;
+		mat4.m_Mat[2][3] = -1;
+
+		mat4.m_Mat[3][0] = 0;
+		mat4.m_Mat[3][1] = 0;
+		mat4.m_Mat[3][2] = f * n;
+		mat4.m_Mat[3][3] = 0;
+
+		mat4 =  mat4 * Matrix4::Orthographic(l, r, b, t, f, n);
+
+		return mat4;
+	}
+
+
 
 	Matrix4 operator+(const Matrix4& m1, const Matrix4& m2)
 	{
@@ -280,10 +315,10 @@ namespace PIRenderer {
 	{
 		float x, y, z, w;
 
+		x = v.x * m.m_Mat[0][0] + v.y * m.m_Mat[1][0] + v.z * m.m_Mat[2][0] + m.m_Mat[3][0];
 		y = v.x * m.m_Mat[0][1] + v.y * m.m_Mat[1][1] + v.z * m.m_Mat[2][1] + m.m_Mat[3][1];
 		z = v.x * m.m_Mat[0][2] + v.y * m.m_Mat[1][2] + v.z * m.m_Mat[2][2] + m.m_Mat[3][2];
 		w = v.x * m.m_Mat[0][3] + v.y * m.m_Mat[1][3] + v.z * m.m_Mat[2][3] + m.m_Mat[3][3];
-		x = v.x * m.m_Mat[0][0] + v.y * m.m_Mat[1][0] + v.z * m.m_Mat[2][0] + m.m_Mat[3][0];
 
 		return Vector3f(x / w, y / w, z / w);
 	}

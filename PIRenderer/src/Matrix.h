@@ -25,6 +25,7 @@ namespace PIRenderer {
 
 		static Matrix4 LookAt(const Vector3f& eyePos, const Vector3f& lookAt, const Vector3f& upAxis);
 		static Matrix4 Orthographic(float l, float r, float b, float t, float f, float n);
+		static Matrix4 Perspective(float n, float f, float fov, float aspectRatio);
 	public:
 		float m_Mat[4][4];
 	};

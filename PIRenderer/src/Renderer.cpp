@@ -23,7 +23,7 @@ namespace PIRenderer {
 
 		int index = y * m_Width + x;
 		float depth = m_DepthBuffer[index];
-		if (depth > z)
+		if (depth < z)
 		{
 			return;
 		}
@@ -144,6 +144,23 @@ namespace PIRenderer {
 		{
 			float t = (float)(x - x1) / (x2 - x1);
 			Vertex::Interpolate(v, *v1, *v2, t);
+
+			//Early-Z
+			int index = (int)v->m_Position.y * m_Width + (int)v->m_Position.x;
+
+			//cliping
+			if (index < 0 || index >= m_Width * m_Height)
+			{
+				continue;
+			}
+
+			float depth = m_DepthBuffer[index];
+			if (depth < v->m_Position.z)
+			{
+				continue;
+			}
+			m_DepthBuffer[index] = v->m_Position.z;
+
 			m_Shader->FragmentShader(v);
 
 			SetPixel(v->m_Position.x, v->m_Position.y, v->m_Position.z, v->m_Color);
@@ -281,7 +298,7 @@ namespace PIRenderer {
 	void Renderer::Clear()
 	{
 		memset(m_FramBuffer, 0, sizeof(uint32_t) * m_Width * m_Height);
-		std::fill(m_DepthBuffer, m_DepthBuffer + m_Width * m_Height, -FLT_MAX);
+		std::fill(m_DepthBuffer, m_DepthBuffer + m_Width * m_Height, FLT_MAX);
 
 	}
 

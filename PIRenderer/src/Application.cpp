@@ -11,7 +11,9 @@ namespace PIRenderer {
 		m_Mesh = new PIRenderer::Mesh("obj/african_head.obj");//注意相对路径时相对PIRenderer这个文件夹开始的
 		m_Shader = PIRenderer::Shader::Create("BasicShader");
 		m_Texture = new PIRenderer::Texture("obj/african_head_diffuse.tga");
-		m_Controller = new PIRenderer::OrthographicCameraController(-WIDTH / HEIGHT, WIDTH / HEIGHT, -1, 1, -WIDTH / HEIGHT, WIDTH / HEIGHT);
+		m_Controller = new PIRenderer::PerspectiveCameraController(1, 50, 90, WIDTH / HEIGHT);
+
+		/*m_Controller = new PIRenderer::OrthographicCameraController(-WIDTH / HEIGHT, WIDTH / HEIGHT, -1, 1, WIDTH / HEIGHT + 1, -WIDTH / HEIGHT - 1);*/
 
 		m_Renderer->AddMesh(m_Mesh);
 		m_Shader->SetTexture(m_Texture);
