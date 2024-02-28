@@ -165,26 +165,27 @@ namespace PIRenderer {
 
 		Matrix4 mat4;
 		mat4.m_Mat[0][0] = rightDir.x;
-		mat4.m_Mat[0][1] = rightDir.y;
-		mat4.m_Mat[0][2] = rightDir.z;
-		mat4.m_Mat[0][3] = -eyePos.x;
+		mat4.m_Mat[0][1] = upDir.x;
+		mat4.m_Mat[0][2] = lookDir.x;
+		mat4.m_Mat[0][3] = 0;
 
-		mat4.m_Mat[1][0] = upDir.x;
+		mat4.m_Mat[1][0] = rightDir.y;
 		mat4.m_Mat[1][1] = upDir.y;
-		mat4.m_Mat[1][2] = upDir.z;
-		mat4.m_Mat[1][3] = -eyePos.y;
+		mat4.m_Mat[1][2] = lookDir.y;
+		mat4.m_Mat[1][3] = 0;
 
-		mat4.m_Mat[2][0] = lookDir.x;
-		mat4.m_Mat[2][1] = lookDir.y;
+		mat4.m_Mat[2][0] = rightDir.z;
+		mat4.m_Mat[2][1] = upDir.z;
 		mat4.m_Mat[2][2] = lookDir.z;
-		mat4.m_Mat[2][3] = -eyePos.z;
+		mat4.m_Mat[2][3] = 0;
 
 		mat4.m_Mat[3][0] = 0;
 		mat4.m_Mat[3][1] = 0;
 		mat4.m_Mat[3][2] = 0;
 		mat4.m_Mat[3][3] = 1;
 
-		return mat4;
+		//这里犯错了，记住，多推几遍，注意upAxis是世界的轴，不是摄像机的，updir才是摄像机的y方向
+		return Matrix4::Translate(-eyePos.x, -eyePos.y, -eyePos.z) * mat4;
 	}
 
 	Matrix4 Matrix4::Orthographic(float l, float r, float b, float t, float f, float n)
@@ -207,7 +208,7 @@ namespace PIRenderer {
 
 		mat4.m_Mat[3][0] = -(r + l) / (r - l);
 		mat4.m_Mat[3][1] = -(t + b) / (t - b);
-		mat4.m_Mat[3][2] = (n + f) / (n - f);
+		mat4.m_Mat[3][2] = -(n + f) / (n - f);
 		mat4.m_Mat[3][3] = 1;
 
 		return mat4;
@@ -320,7 +321,7 @@ namespace PIRenderer {
 		z = v.x * m.m_Mat[0][2] + v.y * m.m_Mat[1][2] + v.z * m.m_Mat[2][2] + m.m_Mat[3][2];
 		w = v.x * m.m_Mat[0][3] + v.y * m.m_Mat[1][3] + v.z * m.m_Mat[2][3] + m.m_Mat[3][3];
 
-		return Vector3f(x / w, y / w, z / w);
+		return Vector3f(x, y, z, w);
 	}
 
 }

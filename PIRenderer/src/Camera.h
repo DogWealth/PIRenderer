@@ -9,10 +9,13 @@ namespace PIRenderer {
 			: m_ProjectionMatrix(projectionMatrix), m_ViewMatrix(viewMatrix)
 		{
 		}
+
+		//need to debug
 		void LookAt(const Vector3f& eyePos, const Vector3f& lookAt, const Vector3f& upAxis)
 		{
 
 			m_ViewMatrix = Matrix4::LookAt(eyePos, lookAt, upAxis);
+			m_ViewProjectionMatrix = m_ViewMatrix * m_ProjectionMatrix;
 		}
 
 		void SetPosition(const Vector3f& position)
@@ -29,12 +32,12 @@ namespace PIRenderer {
 		}
 		const Vector3f& GetLookDir() const { return m_LookDir; }
 
-		void SetRotation(float rotation)
+		void SetRotation(Vector3f rotation)
 		{
 			m_Rotation = rotation;
 			RecalculateViewMatrix();
 		}
-		float GetRotation() const { return m_Rotation; }
+		Vector3f GetRotation() const { return m_Rotation; }
 
 		const Matrix4& GetProjectionMatrix() const { return m_ProjectionMatrix; }
 		const Matrix4& GetViewMatrix() const { return m_ViewMatrix; }
@@ -44,10 +47,10 @@ namespace PIRenderer {
 	protected:
 		void RecalculateViewMatrix()
 		{
-			Matrix4 transform = Matrix4::Translate(m_Position.x, m_Position.y, m_Position.z);
-			Matrix4 rotation = Matrix4::RotateY(m_Rotation);
+			Matrix4 transform = Matrix4::Translate(-m_Position.x, -m_Position.y, -m_Position.z);
+			Matrix4 rotation = Matrix4::RotateEuler(m_Rotation.y, m_Rotation.x, m_Rotation.z);
 
-			m_ViewMatrix = (Matrix4::Identity() + Matrix4::Identity() - transform) * Matrix4::Transpose(rotation);
+			m_ViewMatrix = transform * Matrix4::Transpose(rotation);
 			m_ViewProjectionMatrix = m_ViewMatrix * m_ProjectionMatrix;
 		}
 
@@ -55,10 +58,10 @@ namespace PIRenderer {
 		Matrix4 m_ProjectionMatrix;
 		Matrix4 m_ViewMatrix;
 		Matrix4 m_ViewProjectionMatrix;
-
+		           
 		Vector3f m_Position = { 0.0f, 0.0f, 2.0f };
 		Vector3f m_LookDir = { 0.0f, 0.0f, -1.0f };
-		float m_Rotation = 0.0f;
+		Vector3f m_Rotation = { 0.0f, 0.0f, 0.0f };
 	};
 
 	class OrthographicCamera : public Camera

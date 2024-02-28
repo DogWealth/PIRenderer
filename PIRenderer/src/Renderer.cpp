@@ -23,7 +23,7 @@ namespace PIRenderer {
 
 		int index = y * m_Width + x;
 		float depth = m_DepthBuffer[index];
-		if (depth < z)
+		if (depth > z)
 		{
 			return;
 		}
@@ -145,6 +145,13 @@ namespace PIRenderer {
 			float t = (float)(x - x1) / (x2 - x1);
 			Vertex::Interpolate(v, *v1, *v2, t);
 
+			//Í¸ÊÓ½ÃÕý
+			float rhw_z = v->m_Position.z;
+			v->m_Position.z = 1.0f / rhw_z;
+			v->m_Color /= rhw_z;
+			v->m_Normal /= rhw_z;
+			v->m_TexCoord /= rhw_z;
+
 			//Early-Z
 			int index = (int)v->m_Position.y * m_Width + (int)v->m_Position.x;
 
@@ -155,7 +162,7 @@ namespace PIRenderer {
 			}
 
 			float depth = m_DepthBuffer[index];
-			if (depth < v->m_Position.z)
+			if (depth > v->m_Position.z)
 			{
 				continue;
 			}
@@ -254,7 +261,6 @@ namespace PIRenderer {
 		
 		if (vertexs.size() == 0) return;
 
-		double time1 = clock();
 		for (int i = 0; i < vertexs.size(); i += 3)
 		{
 			Vertex v1 = vertexs[i];
@@ -263,14 +269,17 @@ namespace PIRenderer {
 
 			m_Shader->VertexShader(&v1, &v2, &v3);
 
+			//debug
+			/*Vector_Print(v1.m_Position);
+			Vector_Print(v2.m_Position);
+			Vector_Print(v3.m_Position);*/
+
 			ViewPort(&v1.m_Position);
 			ViewPort(&v2.m_Position);
 			ViewPort(&v3.m_Position);
 
 			DrawTriangle(&v1, &v2, &v3);
 		}
-		double time2 = clock();
-		//printf("FPS: %lf\n", 1000 / (time2 - time1));
 	}
 
 	void Renderer::DrawMeshLines()
@@ -298,7 +307,7 @@ namespace PIRenderer {
 	void Renderer::Clear()
 	{
 		memset(m_FramBuffer, 0, sizeof(uint32_t) * m_Width * m_Height);
-		std::fill(m_DepthBuffer, m_DepthBuffer + m_Width * m_Height, FLT_MAX);
+		std::fill(m_DepthBuffer, m_DepthBuffer + m_Width * m_Height, -FLT_MAX);
 
 	}
 

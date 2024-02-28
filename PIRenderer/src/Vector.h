@@ -1,12 +1,14 @@
 #pragma once
 #include <cmath>
+#include <stdio.h>
 namespace PIRenderer {
 	template<class T>
 	class Vector3
 	{
 	public:
-		Vector3<T>() { x = y = z = 0; }
+		Vector3<T>() { x = y = z = 0; w = 1; }
 		Vector3(T x, T y, T z);
+		Vector3(T x, T y, T z, T w);
 		Vector3(const Vector3<T>& vector);
 
 		~Vector3() = default;
@@ -25,6 +27,7 @@ namespace PIRenderer {
 		//标量右乘
 		Vector3<T> operator*(float k) const;
 		Vector3<T> operator/(float k) const;
+		Vector3<T> operator+(float k) const;
 		Vector3<T>& operator*=(float k);
 		Vector3<T>& operator/=(float k);
 
@@ -32,6 +35,7 @@ namespace PIRenderer {
 
 		void Zero();
 		void Normalize();
+		void Standardize();
 		float Mag(); //求模长
 
 		//向量求模
@@ -52,6 +56,7 @@ namespace PIRenderer {
 		T x;
 		T y;
 		T z;
+		T w;
 
 		static Vector3<T> ZeroVector;
 	};
@@ -70,6 +75,13 @@ namespace PIRenderer {
 	Vector3<T>::Vector3(T x, T y, T z)
 		: x(x), y(y), z(z)
 	{
+		this->w = 1;
+	}
+
+	template<class T>
+	inline Vector3<T>::Vector3(T x, T y, T z, T w)
+		: x(x), y(y), z(z), w(w)
+	{
 	}
 
 	template<class T>
@@ -78,6 +90,7 @@ namespace PIRenderer {
 		this->x = vector.x;
 		this->y = vector.y;
 		this->z = vector.z;
+		this->w = vector.w;
 	}
 
 	template<class T>
@@ -86,6 +99,7 @@ namespace PIRenderer {
 		this->x = vector.x;
 		this->y = vector.y;
 		this->z = vector.z;
+		this->w = vector.w;
 
 		return *this;
 	}
@@ -93,13 +107,13 @@ namespace PIRenderer {
 	template<class T>
 	bool Vector3<T>::operator==(const Vector3<T>& vector) const
 	{
-		return this->x == vector.x || this->y == vector.y || this->z == vector.z;
+		return this->x == vector.x || this->y == vector.y || this->z == vector.z || this->w == vector.w;
 	}
 
 	template<class T>
 	bool Vector3<T>::operator!=(const Vector3<T>& vector) const
 	{
-		return this->x != vector.x || this->y != vector.y || this->z != vector.z;
+		return !(*this == vector);
 	}
 
 	template<class T>
@@ -154,6 +168,12 @@ namespace PIRenderer {
 	}
 
 	template<class T>
+	Vector3<T> Vector3<T>::operator+(float k) const
+	{
+		return Vector3<T>(x + k, y + k, z + k);
+	}
+
+	template<class T>
 	Vector3<T>& Vector3<T>::operator*=(float k)
 	{
 		this->x *= k;
@@ -200,6 +220,16 @@ namespace PIRenderer {
 			y *= OneOverMag;
 			z *= OneOverMag;
 		}
+	}
+
+	template<class T>
+	inline void Vector3<T>::Standardize()
+	{
+		float inv = 1.0f / w;
+		x = x * inv;
+		y = y * inv;
+		z = z * inv;
+		w = 1.0f;
 	}
 
 	template<class T>
@@ -253,6 +283,12 @@ namespace PIRenderer {
 		return Vector3<T>(vector.x * k, vector.y * k, vector.z * k);
 	}
 
+	template<class T>
+	void Vector_Print(Vector3<T> v)
+	{
+		printf("%f, %f, %f\n", v.x, v.y, v.z);
+	}
+
 
 
 	/*********Vector2**********/
@@ -281,9 +317,25 @@ namespace PIRenderer {
 			return Vector2(u * k, v * k);
 		}
 
+		Vector2 operator*=(float k)
+		{
+			this->u *= k;
+			this->v *= k;
+
+			return *this;
+		}
+
 		Vector2 operator/(float k) const
 		{
 			return Vector2(u / k, v / k);
+		}
+
+		Vector2 operator/=(float k)
+		{
+			this->u /= k;
+			this->v /= k;
+
+			return *this;
 		}
 
 		static Vector2 Interpolate(const Vector2& v1, const Vector2& v2, float t)
@@ -302,5 +354,10 @@ namespace PIRenderer {
 	public:
 		float u, v;
 	};
+
+	inline void Vector2_Print(Vector2 v)
+	{
+		printf("%f, %f\n", v.u, v.v);
+	}
 
 }

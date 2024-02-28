@@ -16,6 +16,9 @@ namespace PIRenderer {
 		virtual void SetTexture(Texture* texture) override;
 		virtual void SetVPMatrix(Matrix4 vpMatrix) override;
 
+	protected:
+		void Vertex_rhw_Init(Vertex* v);
+
 	public:
 		DirectionLight m_DirectionLight;
 		Vector3f n;

@@ -11,9 +11,9 @@ namespace PIRenderer {
 		m_Mesh = new PIRenderer::Mesh("obj/african_head.obj");//注意相对路径时相对PIRenderer这个文件夹开始的
 		m_Shader = PIRenderer::Shader::Create("BasicShader");
 		m_Texture = new PIRenderer::Texture("obj/african_head_diffuse.tga");
-		m_Controller = new PIRenderer::PerspectiveCameraController(1, 50, 90, WIDTH / HEIGHT);
+		m_Controller = new PIRenderer::OrbitController(1, 50, 90, WIDTH / HEIGHT);
 
-		/*m_Controller = new PIRenderer::OrthographicCameraController(-WIDTH / HEIGHT, WIDTH / HEIGHT, -1, 1, WIDTH / HEIGHT + 1, -WIDTH / HEIGHT - 1);*/
+		//m_Controller = new PIRenderer::OrthographicCameraController(-WIDTH / HEIGHT, WIDTH / HEIGHT, -1, 1, 1, - 1);
 
 		m_Renderer->AddMesh(m_Mesh);
 		m_Shader->SetTexture(m_Texture);
@@ -36,7 +36,7 @@ namespace PIRenderer {
 		while (m_Running)
 		{
 			double time = clock();
-			printf("FPS: %lf\n", 1000 / (time - old_time));
+			//printf("FPS: %lf\n", 1000 / (time - old_time));
 			old_time = time;
 			//SDL_LockSurface(m_Surface);
 

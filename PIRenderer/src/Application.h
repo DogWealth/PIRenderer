@@ -26,6 +26,7 @@ namespace PIRenderer {
 		Shader*	m_Shader;
 		Texture* m_Texture;
 		PerspectiveCameraController* m_Controller;
+		//OrthographicCameraController* m_Controller;
 
 		bool m_Running = true;
 
