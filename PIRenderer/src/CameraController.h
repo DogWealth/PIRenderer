@@ -53,7 +53,7 @@ namespace PIRenderer {
 		virtual void OnUpdate() override;
 
 	private:
-		float Radius = 3;
+		float Radius = 5;
 		float Theta = 0;
 		float Phi = 0;
 

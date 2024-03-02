@@ -10,14 +10,15 @@ namespace PIRenderer {
 		BasicShader();
 		virtual ~BasicShader();
 
-		virtual void VertexShader(Vertex* v1, Vertex* v2, Vertex* v3) override;
-		virtual void FragmentShader(Vertex* v) override;
+		virtual V2F VertexShader(const Vertex& v) override;
+		virtual void FragmentShader(V2F* v) override;
 
 		virtual void SetTexture(Texture* texture) override;
 		virtual void SetVPMatrix(Matrix4 vpMatrix) override;
+		virtual void SetModelMatrix(Matrix4 Model) override;
 
 	protected:
-		void Vertex_rhw_Init(Vertex* v);
+		void Vertex_rhw_Init(V2F* v2f);
 
 	public:
 		DirectionLight m_DirectionLight;
@@ -25,6 +26,7 @@ namespace PIRenderer {
 
 		Texture* m_Texture;
 		Matrix4 m_VPMatrix;
+		Matrix4 m_ModelMatrix;
 	};
 }
 

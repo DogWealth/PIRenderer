@@ -22,10 +22,10 @@ namespace PIRenderer {
 		void DrawTriangle(Vector3f v1, Vector3f v2, Vector3f v3, const Vector3f& color);//scanline
 
 		void DrawLine(Vertex* v1, Vertex* v2);
-		void DrawScanline(Vertex* v, Vertex* v1, Vertex* v2);
+		void DrawScanline(V2F* v, V2F* v1, V2F* v2);
 
 		void DrawTriangleLine(Vertex* v1, Vertex* v2, Vertex* v3);
-		void DrawTriangle(Vertex* v1, Vertex* v2, Vertex* v3);//scanline
+		void DrawTriangle(V2F* v1, V2F* v2, V2F* v3);//scanline
 
 		void DrawMeshLine(Mesh* mesh);
 		void DrawMesh(Mesh* mesh);
@@ -42,6 +42,9 @@ namespace PIRenderer {
 
 	private:
 		void ViewPort(Vector3f* pos);
+		bool FaceCulling(const Vector3f& v1, const Vector3f v2, const Vector3f v3);
+		bool ViewCulling(const Vector3f& v1, const Vector3f v2, const Vector3f v3);
+		void PerspectiveDivision(Vector3f* v);
 
 	private:
 		uint32_t* m_FramBuffer;

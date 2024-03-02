@@ -23,7 +23,7 @@ namespace PIRenderer {
 
 		int index = y * m_Width + x;
 		float depth = m_DepthBuffer[index];
-		if (depth > z)
+		if (depth < z)
 		{
 			return;
 		}
@@ -132,28 +132,28 @@ namespace PIRenderer {
 		}
 	}
 
-	void Renderer::DrawScanline(Vertex* v, Vertex* v1, Vertex* v2)
+	void Renderer::DrawScanline(V2F* v, V2F* v1, V2F* v2)
 	{
-		if (v1->m_Position.x > v2->m_Position.x)
+		if (v1->m_ScreenPos.x > v2->m_ScreenPos.x)
 			std::swap(v1, v2);
 
-		int x1 = v1->m_Position.x;
-		int x2 = v2->m_Position.x;
+		int x1 = v1->m_ScreenPos.x;
+		int x2 = v2->m_ScreenPos.x;
 
 		for (int x = x1; x < x2; x++)
 		{
 			float t = (float)(x - x1) / (x2 - x1);
-			Vertex::Interpolate(v, *v1, *v2, t);
+			V2F::Interpolate(v, *v1, *v2, t);
 
 			//透视矫正
-			float rhw_z = v->m_Position.z;
-			v->m_Position.z = 1.0f / rhw_z;
+			float rhw_z = v->m_rhw;
+			v->m_WorldPos /= rhw_z;
 			v->m_Color /= rhw_z;
 			v->m_Normal /= rhw_z;
-			v->m_TexCoord /= rhw_z;
+			v->m_Texcoord /= rhw_z;
 
 			//Early-Z
-			int index = (int)v->m_Position.y * m_Width + (int)v->m_Position.x;
+			int index = (int)v->m_ScreenPos.y * m_Width + (int)v->m_ScreenPos.x;
 
 			//cliping
 			if (index < 0 || index >= m_Width * m_Height)
@@ -162,15 +162,15 @@ namespace PIRenderer {
 			}
 
 			float depth = m_DepthBuffer[index];
-			if (depth > v->m_Position.z)
+			if (depth < v->m_ScreenPos.z)
 			{
 				continue;
 			}
-			m_DepthBuffer[index] = v->m_Position.z;
+			m_DepthBuffer[index] = v->m_ScreenPos.z;
 
 			m_Shader->FragmentShader(v);
 
-			SetPixel(v->m_Position.x, v->m_Position.y, v->m_Position.z, v->m_Color);
+			SetPixel(v->m_ScreenPos.x, v->m_ScreenPos.y, v->m_ScreenPos.z, v->m_Color);
 		}
 	}
 
@@ -181,23 +181,23 @@ namespace PIRenderer {
 		DrawLine(v2, v3);
 	}
 
-	void Renderer::DrawTriangle(Vertex* v1, Vertex* v2, Vertex* v3)
+	void Renderer::DrawTriangle(V2F* v1, V2F* v2, V2F* v3)
 	{
-		if (v1->m_Position.y > v2->m_Position.y) std::swap(v1, v2);
-		if (v1->m_Position.y > v3->m_Position.y) std::swap(v1, v3);
-		if (v2->m_Position.y > v3->m_Position.y) std::swap(v2, v3);
+		if (v1->m_ScreenPos.y > v2->m_ScreenPos.y) std::swap(v1, v2);
+		if (v1->m_ScreenPos.y > v3->m_ScreenPos.y) std::swap(v1, v3);
+		if (v2->m_ScreenPos.y > v3->m_ScreenPos.y) std::swap(v2, v3);
 
-		Vector3f p1 = v1->m_Position;
-		Vector3f p2 = v2->m_Position;
-		Vector3f p3 = v3->m_Position;
+		Vector3f p1 = v1->m_ScreenPos;
+		Vector3f p2 = v2->m_ScreenPos;
+		Vector3f p3 = v3->m_ScreenPos;
 
 		float totalH = p3.y - p1.y;
 
 		//上三角形
-		Vertex v_12;
-		Vertex v_13;
-		Vertex v_23;
-		Vertex v;
+		V2F v_12;
+		V2F v_13;
+		V2F v_23;
+		V2F v;
 
 
 		for (int y = p1.y + 1; y <= p2.y; y++)
@@ -207,10 +207,10 @@ namespace PIRenderer {
 			float t_12 = (float)(y - p1.y) / halfH;
 			float t_13 = (float)(y - p1.y) / totalH;
 
-			Vertex::Interpolate(&v_12, *v1, *v2, t_12);
-			Vertex::Interpolate(&v_13, *v1, *v3, t_13);
+			V2F::Interpolate(&v_12, *v1, *v2, t_12);
+			V2F::Interpolate(&v_13, *v1, *v3, t_13);
 
-			if (v_12.m_Position.x > v_13.m_Position.x) std::swap(v_12, v_13);
+			if (v_12.m_ScreenPos.x > v_13.m_ScreenPos.x) std::swap(v_12, v_13);
 
 			DrawScanline(&v, &v_12, &v_13);
 		}
@@ -223,11 +223,11 @@ namespace PIRenderer {
 			float t_13 = (float)(y - p1.y) / totalH;
 
 
-			Vertex::Interpolate(&v_23, *v2, *v3, t_23);
-			Vertex::Interpolate(&v_13, *v1, *v3, t_13);
+			V2F::Interpolate(&v_23, *v2, *v3, t_23);
+			V2F::Interpolate(&v_13, *v1, *v3, t_13);
 
 
-			if (v_23.m_Position.x > v_13.m_Position.x) std::swap(v_23, v_13);
+			if (v_23.m_ScreenPos.x > v_13.m_ScreenPos.x) std::swap(v_23, v_13);
 
 			DrawScanline(&v, &v_23, &v_13);
 		}
@@ -263,20 +263,22 @@ namespace PIRenderer {
 
 		for (int i = 0; i < vertexs.size(); i += 3)
 		{
-			Vertex v1 = vertexs[i];
-			Vertex v2 = vertexs[i + 1];
-			Vertex v3 = vertexs[i + 2];
+			V2F v1 = m_Shader->VertexShader(vertexs[i]);
+			V2F v2 = m_Shader->VertexShader(vertexs[i + 1]);
+			V2F v3 = m_Shader->VertexShader(vertexs[i + 2]);
 
-			m_Shader->VertexShader(&v1, &v2, &v3);
+			//视锥剔除
+			
+			PerspectiveDivision(&v1.m_ScreenPos);
+			PerspectiveDivision(&v2.m_ScreenPos);
+			PerspectiveDivision(&v3.m_ScreenPos);
 
-			//debug
-			/*Vector_Print(v1.m_Position);
-			Vector_Print(v2.m_Position);
-			Vector_Print(v3.m_Position);*/
+			//back face culling
+			if (!FaceCulling(v1.m_ScreenPos, v2.m_ScreenPos, v3.m_ScreenPos)) continue;
 
-			ViewPort(&v1.m_Position);
-			ViewPort(&v2.m_Position);
-			ViewPort(&v3.m_Position);
+			ViewPort(&v1.m_ScreenPos);
+			ViewPort(&v2.m_ScreenPos);
+			ViewPort(&v3.m_ScreenPos);
 
 			DrawTriangle(&v1, &v2, &v3);
 		}
@@ -307,7 +309,7 @@ namespace PIRenderer {
 	void Renderer::Clear()
 	{
 		memset(m_FramBuffer, 0, sizeof(uint32_t) * m_Width * m_Height);
-		std::fill(m_DepthBuffer, m_DepthBuffer + m_Width * m_Height, -FLT_MAX);
+		std::fill(m_DepthBuffer, m_DepthBuffer + m_Width * m_Height, FLT_MAX);
 
 	}
 
@@ -320,5 +322,32 @@ namespace PIRenderer {
 	{
 		pos->x = (pos->x + 1.0f) * 0.5f * m_Width;
 		pos->y = (1.0f - pos->y) * 0.5f * m_Height; //坐标反转了
+	}
+
+	//背面剔除
+	bool Renderer::FaceCulling(const Vector3f& v1, const Vector3f v2, const Vector3f v3)
+	{
+		Vector3f v12 = v2 - v1;
+		Vector3f v13 = v3 - v1;
+		Vector3f view = { 0, 0, 1 };
+
+		Vector3f normal = Vector3f::CrossProduct(v12, v13);
+
+		return (normal * view) > 0;
+	}
+
+	bool Renderer::ViewCulling(const Vector3f& v1, const Vector3f v2, const Vector3f v3)
+	{
+
+		return false;
+	}
+
+	void Renderer::PerspectiveDivision(Vector3f* v)
+	{
+		v->x /= v->w;
+		v->y /= v->w;
+		v->z /= v->w;
+		v->w = 1.0f;
+
 	}
 }

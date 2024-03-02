@@ -5,40 +5,29 @@ namespace PIRenderer {
 	BasicShader::BasicShader()
 	{
 		m_Texture = nullptr;
+		m_ModelMatrix = Matrix4::Identity();
 	}
 
 	BasicShader::~BasicShader()
 	{
 	}
 
-	void BasicShader::VertexShader(Vertex* v1, Vertex* v2, Vertex* v3)
+	V2F BasicShader::VertexShader(const Vertex& v)
 	{
-		v1->m_Position = v1->m_Position * m_VPMatrix;
-		v2->m_Position = v2->m_Position * m_VPMatrix;
-		v3->m_Position = v3->m_Position * m_VPMatrix;
+		//VertexShader中不应该执行透视除法，透视除法是一个单独的过程，VertexShader输出的是四维齐次坐标
+		V2F v2f;
+		v2f.m_WorldPos	= v.m_Position * m_ModelMatrix;
+		v2f.m_ScreenPos = v.m_Position * m_ModelMatrix * m_VPMatrix;
+		v2f.m_Normal	= v.m_Normal;
+		v2f.m_Texcoord	= v.m_TexCoord;
+		v2f.m_Color		= v.m_Color;
 
-		v1->m_Position.x /= v1->m_Position.w;
-		v2->m_Position.x /= v2->m_Position.w;
-		v3->m_Position.x /= v3->m_Position.w;
+		Vertex_rhw_Init(&v2f);
 
-		v1->m_Position.y /= v1->m_Position.w;
-		v2->m_Position.y /= v2->m_Position.w;
-		v3->m_Position.y /= v3->m_Position.w;
-
-		v1->m_Position.z = -v1->m_Position.w;
-		v2->m_Position.z = -v2->m_Position.w;
-		v3->m_Position.z = -v3->m_Position.w;
-
-		v1->m_Position.w = 1.0f;
-		v2->m_Position.w = 1.0f;
-		v3->m_Position.w = 1.0f;
-
-		Vertex_rhw_Init(v1);
-		Vertex_rhw_Init(v2);
-		Vertex_rhw_Init(v3);
+		return v2f;
 	}
 
-	void BasicShader::FragmentShader(Vertex* v)
+	void BasicShader::FragmentShader(V2F* v)
 	{
 
 		v->m_Normal.Normalize();
@@ -47,7 +36,10 @@ namespace PIRenderer {
 
 		if (intensity > 0)
 		{
-			v->m_Color = *(m_Texture->Sample(v->m_TexCoord.u, v->m_TexCoord.v)) * intensity;
+			if (m_Texture)
+				v->m_Color = *(m_Texture->Sample(v->m_Texcoord.u, v->m_Texcoord.v)) * intensity;
+			else
+				v->m_Color = { 1, 1, 1 };
 		}
 		else
 		{
@@ -65,14 +57,19 @@ namespace PIRenderer {
 		m_VPMatrix = vpMatrix;
 	}
 
-	void BasicShader::Vertex_rhw_Init(Vertex* v)
+	void BasicShader::SetModelMatrix(Matrix4 Model)
 	{
-		float rhw_z = 1.0f / v->m_Position.z;
+		m_ModelMatrix = Model;
+	}
 
-		v->m_Position.z = rhw_z;
-		v->m_Color *= rhw_z;
-		v->m_Normal *= rhw_z;
-		v->m_TexCoord *= rhw_z;
+	void BasicShader::Vertex_rhw_Init(V2F* v2f)
+	{
+		v2f->m_rhw = 1.0f / -v2f->m_ScreenPos.w;
+
+		v2f->m_WorldPos *= v2f->m_rhw;
+		v2f->m_Color	*= v2f->m_rhw;
+		v2f->m_Normal	*= v2f->m_rhw;
+		v2f->m_Texcoord *= v2f->m_rhw;
 	}
 
 }

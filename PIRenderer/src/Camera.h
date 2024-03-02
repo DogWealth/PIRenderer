@@ -10,7 +10,7 @@ namespace PIRenderer {
 		{
 		}
 
-		//need to debug
+		
 		void LookAt(const Vector3f& eyePos, const Vector3f& lookAt, const Vector3f& upAxis)
 		{
 
