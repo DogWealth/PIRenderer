@@ -267,20 +267,29 @@ namespace PIRenderer {
 			V2F v2 = m_Shader->VertexShader(vertexs[i + 1]);
 			V2F v3 = m_Shader->VertexShader(vertexs[i + 2]);
 
-			//ÊÓ×¶ÌÞ³ý
-			
-			PerspectiveDivision(&v1.m_ScreenPos);
-			PerspectiveDivision(&v2.m_ScreenPos);
-			PerspectiveDivision(&v3.m_ScreenPos);
 
-			//back face culling
-			if (!FaceCulling(v1.m_ScreenPos, v2.m_ScreenPos, v3.m_ScreenPos)) continue;
+			//ÊÓ×¶ÌÞ³ý£¬Æë´Î²Ã¼ô
+			auto vertices = SutherlandHodgeman(v1, v2, v3);
 
-			ViewPort(&v1.m_ScreenPos);
-			ViewPort(&v2.m_ScreenPos);
-			ViewPort(&v3.m_ScreenPos);
+			for (int j = 0; j < int(vertices.size() - 2); j++)
+			{
+				v1 = vertices[0];
+				v2 = vertices[j + 1];
+				v3 = vertices[j + 2];
 
-			DrawTriangle(&v1, &v2, &v3);
+				PerspectiveDivision(&v1);
+				PerspectiveDivision(&v2);
+				PerspectiveDivision(&v3);
+
+				//back face culling
+				if (!FaceCulling(v1.m_ScreenPos, v2.m_ScreenPos, v3.m_ScreenPos)) continue;
+
+				ViewPort(&v1.m_ScreenPos);
+				ViewPort(&v2.m_ScreenPos);
+				ViewPort(&v3.m_ScreenPos);
+
+				DrawTriangle(&v1, &v2, &v3);
+			}
 		}
 	}
 
@@ -342,12 +351,93 @@ namespace PIRenderer {
 		return false;
 	}
 
-	void Renderer::PerspectiveDivision(Vector3f* v)
+	void Renderer::PerspectiveDivision(V2F* v)
 	{
-		v->x /= v->w;
-		v->y /= v->w;
-		v->z /= v->w;
-		v->w = 1.0f;
+		//rhw_init
+		v->m_rhw = 1.0f / -v->m_ScreenPos.w;
+
+		v->m_WorldPos	*= v->m_rhw;
+		v->m_Color		*= v->m_rhw;
+		v->m_Normal		*= v->m_rhw;
+		v->m_Texcoord	*= v->m_rhw;
+
+		//Í¸ÊÓ³ý·¨
+		v->m_ScreenPos.x /= v->m_ScreenPos.w;
+		v->m_ScreenPos.y /= v->m_ScreenPos.w;
+		v->m_ScreenPos.z /= v->m_ScreenPos.w;
+		v->m_ScreenPos.w = 1.0f;
 
 	}
+
+	bool Renderer::InsidePlane(const Vector3f& plane, const Vector3f& pos)
+	{
+		return (plane.x * pos.x + plane.y * pos.y + plane.z * pos.z + plane.w * pos.w) >= 0;
+	}
+
+	bool Renderer::AllInsidePlane(const V2F& v1, const V2F& v2, const V2F& v3)
+	{
+		if (v1.m_ScreenPos.x > v1.m_ScreenPos.w || v1.m_ScreenPos.x < -v1.m_ScreenPos.w) return false;
+		if (v1.m_ScreenPos.y > v1.m_ScreenPos.w || v1.m_ScreenPos.y < -v1.m_ScreenPos.w) return false;
+		if (v1.m_ScreenPos.z > v1.m_ScreenPos.w || v1.m_ScreenPos.z < -v1.m_ScreenPos.w) return false;
+		if (v2.m_ScreenPos.x > v2.m_ScreenPos.w || v2.m_ScreenPos.x < -v2.m_ScreenPos.w) return false;
+		if (v2.m_ScreenPos.y > v2.m_ScreenPos.w || v2.m_ScreenPos.y < -v2.m_ScreenPos.w) return false;
+		if (v2.m_ScreenPos.z > v2.m_ScreenPos.w || v2.m_ScreenPos.z < -v2.m_ScreenPos.w) return false;
+		if (v3.m_ScreenPos.x > v3.m_ScreenPos.w || v3.m_ScreenPos.x < -v3.m_ScreenPos.w) return false;
+		if (v3.m_ScreenPos.y > v3.m_ScreenPos.w || v3.m_ScreenPos.y < -v3.m_ScreenPos.w) return false;
+		if (v3.m_ScreenPos.z > v3.m_ScreenPos.w || v3.m_ScreenPos.z < -v3.m_ScreenPos.w) return false;
+
+		return true;
+	}
+
+	V2F Renderer::Intersect(const V2F& v1, const V2F& v2, const Vector3f& plane)
+	{
+		float d1 =	v1.m_ScreenPos.x * plane.x + 
+					v1.m_ScreenPos.y * plane.y + 
+					v1.m_ScreenPos.z * plane.z + 
+					v1.m_ScreenPos.w * plane.w;
+
+		float d2 =	v2.m_ScreenPos.x * plane.x +
+					v2.m_ScreenPos.y * plane.y +
+					v2.m_ScreenPos.z * plane.z +
+					v2.m_ScreenPos.w * plane.w;
+
+		float t = d1 / (d1 - d2);
+
+		V2F v;
+		V2F::Interpolate(&v, v1, v2, t);
+		return v;
+	}
+
+	std::vector<V2F> Renderer::SutherlandHodgeman(const V2F& v1, const V2F& v2, const V2F& v3)
+	{
+		std::vector<V2F> output = { v1, v2, v3 };
+
+		if (AllInsidePlane(v1, v2, v3)) return output;
+
+		for (auto& plane : Viewplanes)
+		{
+			std::vector<V2F> input = output;
+			output.clear();
+			for (int i = 0; i < input.size(); i++)
+			{
+				V2F cur = input[i];
+				V2F nex = input[(i + 1) % input.size()];
+				if (InsidePlane(plane, cur.m_ScreenPos))
+				{
+					output.push_back(input[i]);
+					if (!InsidePlane(plane, nex.m_ScreenPos))
+					{
+						output.push_back(Intersect(cur, nex, plane));
+					}
+				}
+				else if (InsidePlane(plane, nex.m_ScreenPos))
+				{
+					output.push_back(Intersect(cur, nex, plane));
+				}
+			}
+		}
+
+		return output;
+	}
+
 }

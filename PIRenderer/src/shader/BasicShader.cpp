@@ -22,7 +22,7 @@ namespace PIRenderer {
 		v2f.m_Texcoord	= v.m_TexCoord;
 		v2f.m_Color		= v.m_Color;
 
-		Vertex_rhw_Init(&v2f);
+		//Vertex_rhw_Init(&v2f);
 
 		return v2f;
 	}

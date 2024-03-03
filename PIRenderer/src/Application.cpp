@@ -21,7 +21,7 @@ namespace PIRenderer {
 
 		//m_Renderer->AddMesh(m_Mesh);
 		
-		//m_Shader->SetTexture(m_Texture);
+		m_Shader->SetTexture(m_Texture);
 		m_HeadShader->SetTexture(m_HeadTexture);
 
 	}

@@ -42,9 +42,14 @@ namespace PIRenderer {
 
 	private:
 		void ViewPort(Vector3f* pos);
-		bool FaceCulling(const Vector3f& v1, const Vector3f v2, const Vector3f v3);
+		bool FaceCulling(const Vector3f& v1, const Vector3f v2, const Vector3f v3);//±³ÃæÌÞ³ý
 		bool ViewCulling(const Vector3f& v1, const Vector3f v2, const Vector3f v3);
-		void PerspectiveDivision(Vector3f* v);
+		void PerspectiveDivision(V2F* v);
+		//ÊÓ×¶ÌÞ³ýºÍÆë´Î²Ã¼ô
+		bool InsidePlane(const Vector3f& plane, const Vector3f& pos);
+		bool AllInsidePlane(const V2F& v1, const V2F& v2, const V2F& v3);
+		V2F Intersect(const V2F& v1, const V2F& v2, const Vector3f& plane);
+		std::vector<V2F> SutherlandHodgeman(const V2F& v1, const V2F& v2, const V2F& v3);
 
 	private:
 		uint32_t* m_FramBuffer;
@@ -58,5 +63,20 @@ namespace PIRenderer {
 
 		int m_Width;
 		int m_Height;
+
+		const std::vector<Vector3f> Viewplanes = {
+			//near plane
+			{0, 0, 1, 1},
+			//far plane
+			{0, 0, -1, 1},
+			//left plane
+			{1, 0, 0, 1},
+			//right plane
+			{-1, 0, 0, 1},
+			//top plane
+			{0, -1, 0, 1},
+			//bottom plane
+			{0, 1, 0, 1}
+		};
 	};
 }

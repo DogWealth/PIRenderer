@@ -208,7 +208,7 @@ namespace PIRenderer {
 
 		mat4.m_Mat[3][0] = -(r + l) / (r - l);
 		mat4.m_Mat[3][1] = -(t + b) / (t - b);
-		mat4.m_Mat[3][2] = -(n + f) / (n - f);
+		mat4.m_Mat[3][2] = (n + f) / (n - f);
 		mat4.m_Mat[3][3] = 1;
 
 		return mat4;
