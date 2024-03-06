@@ -49,21 +49,16 @@ namespace PIRenderer {
 		bool InsidePlane(const Vector3f& plane, const Vector3f& pos);
 		bool AllInsidePlane(const V2F& v1, const V2F& v2, const V2F& v3);
 		V2F Intersect(const V2F& v1, const V2F& v2, const Vector3f& plane);
-		std::vector<V2F> SutherlandHodgeman(const V2F& v1, const V2F& v2, const V2F& v3);
+		std::vector<V2F> SutherlandHodgeman(const V2F& v1, const V2F& v2, const V2F& v3);//需要优化
 
 	private:
 		uint32_t* m_FramBuffer;
 		float* m_DepthBuffer;
-
 		Shader* m_Shader;
-
 		std::vector<Mesh*> m_Meshs;
-
 		DirectionLight m_DirectionLight;
-
 		int m_Width;
 		int m_Height;
-
 		const std::vector<Vector3f> Viewplanes = {
 			//near plane
 			{0, 0, 1, 1},

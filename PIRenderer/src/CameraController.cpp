@@ -1,5 +1,7 @@
 #include "CameraController.h"
 #include "Input.h"
+#define MIN(a, b) (a >= b)? b : a 
+#define MAX(a, b) (a <= b)? b : a 
 namespace PIRenderer {
 	OrthographicCameraController::OrthographicCameraController(float left, float right, float bottom, float top, float far, float near)
 		: m_Camera(left, right, bottom, top, far, near)
@@ -74,11 +76,13 @@ namespace PIRenderer {
 		if (Input::IsKeyPressed(SDL_SCANCODE_UP))
 		{
 			Phi += m_CameraRotationSpeed;
+			Phi = MIN(90, Phi);
 		}
 
 		if (Input::IsKeyPressed(SDL_SCANCODE_DOWN))
 		{
 			Phi -= m_CameraRotationSpeed;
+			Phi = MAX(-90, Phi);
 		}
 
 		if (Input::IsKeyPressed(SDL_SCANCODE_W))

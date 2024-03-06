@@ -38,6 +38,8 @@ namespace PIRenderer {
 		void Standardize();
 		float Mag(); //求模长
 
+		static Vector3<T> Normalize(const Vector3<T>& vector);
+
 		//向量求模
 		static float VectorMag(const Vector3<T>& vector);
 
@@ -236,6 +238,18 @@ namespace PIRenderer {
 	float Vector3<T>::Mag()
 	{
 		return sqrt(x * x + y * y + z * z);
+	}
+
+	template<class T>
+	inline Vector3<T> Vector3<T>::Normalize(const Vector3<T>& v)
+	{
+		float Magnitude = v.x * v.x + v.y * v.y + v.z * v.z;
+		if (Magnitude > 0.0f) //检查除0
+		{
+			float OneOverMag = 1.0f / sqrt(Magnitude);
+			return Vector3<T>(v.x * OneOverMag, v.y * OneOverMag, v.z * OneOverMag);
+		}
+		return Vector3<T>(0, 0, 0);
 	}
 
 	template<class T>

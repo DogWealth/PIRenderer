@@ -2,6 +2,7 @@
 #include <string>
 #include "Vertex.h"
 #include "Texture.h"
+#include "Light.h"
 namespace PIRenderer {
 	class V2F
 	{
@@ -32,6 +33,9 @@ namespace PIRenderer {
 		virtual void SetTexture(Texture* texture) = 0;
 		virtual void SetVPMatrix(Matrix4 vpMatrix) = 0;
 		virtual void SetModelMatrix(Matrix4 Model) = 0;
+
+		virtual void SetLight(DirectionLight dLight) = 0;
+		virtual void SetEyePos(const Vector3f eyepos) = 0;
 
 		static Shader* Create(const std::string& name);
 	};

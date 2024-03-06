@@ -14,16 +14,18 @@ namespace PIRenderer {
 		m_Controller = new PIRenderer::OrbitController(1, 50, 90, WIDTH / HEIGHT);
 
 		m_HeadMesh = new PIRenderer::Mesh("obj/african_head.obj");
-		m_HeadShader = PIRenderer::Shader::Create("BasicShader");
+		m_HeadShader = PIRenderer::Shader::Create("Blinn_PhongShader");
 		m_HeadTexture = new PIRenderer::Texture("obj/african_head_diffuse.tga");
+
+		m_LightMesh = new PIRenderer::Mesh("obj/cube.obj");
+		m_LightShader = PIRenderer::Shader::Create("LightShader");
 
 		//m_Controller = new PIRenderer::OrthographicCameraController(-WIDTH / HEIGHT, WIDTH / HEIGHT, -1, 1, 1, - 1);
 
 		//m_Renderer->AddMesh(m_Mesh);
 		
-		m_Shader->SetTexture(m_Texture);
+		//m_Shader->SetTexture(m_Texture);
 		m_HeadShader->SetTexture(m_HeadTexture);
-
 	}
 
 	Application::~Application()
@@ -34,6 +36,11 @@ namespace PIRenderer {
 		delete m_Shader;
 		delete m_Texture;
 		delete m_Controller;
+		delete m_HeadMesh;
+		delete m_HeadShader;
+		delete m_HeadTexture;
+		delete m_LightMesh;
+		delete m_LightShader;
 	}
 
 	void Application::Run()
@@ -58,6 +65,13 @@ namespace PIRenderer {
 		m_Controller->OnUpdate();
 		Matrix4 VPMatrix = m_Controller->GetCamera().GetViewProjectionMatrix();
 		Matrix4 ModelMatrix = Matrix4::Scale(0.1, 0.1, 0.1) * Matrix4::RotateX(90) * Matrix4::Translate(0, -1, 0);
+		Matrix4 HeadModelMatrix = Matrix4::Scale(1, 1, 1);
+		DirectionLight dLight = { {-1, -1, 0}, {1, 1, 0}, 1};
+
+		Matrix4 LightModelMatrix = Matrix4::Scale(0.1, 0.1, 0.1) *  Matrix4::Translate(dLight.GetPosition());
+
+		m_Shader->SetLight(dLight);
+		m_HeadShader->SetLight(dLight);
 
 		m_Renderer->BindShader(m_Shader);
 		m_Shader->SetVPMatrix(VPMatrix);
@@ -67,8 +81,16 @@ namespace PIRenderer {
 
 		m_Renderer->BindShader(m_HeadShader);
 		m_HeadShader->SetVPMatrix(VPMatrix);
+		m_HeadShader->SetModelMatrix(HeadModelMatrix);
 
 		Render(m_HeadMesh);
+
+		m_Renderer->BindShader(m_LightShader);
+		m_LightShader->SetVPMatrix(VPMatrix);
+		m_LightShader->SetModelMatrix(LightModelMatrix);
+		m_LightShader->SetEyePos(m_Controller->GetCamera().GetPosition());
+
+		Render(m_LightMesh);
 
 		m_Window->OnUpdate();
 	}

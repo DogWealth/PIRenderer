@@ -78,6 +78,11 @@ namespace PIRenderer {
 		return m;
 	}
 
+	Matrix4 Matrix4::Translate(const Vector3f& pos)
+	{
+		return Translate(pos.x, pos.y, pos.z);
+	}
+
 	Matrix4 Matrix4::Scale(float x, float y, float z)
 	{
 		Matrix4 m = Matrix4::Identity();

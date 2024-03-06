@@ -14,6 +14,7 @@ namespace PIRenderer {
 		static Matrix4 Transpose(const Matrix4& m);
 
 		static Matrix4 Translate(float x, float y, float z);
+		static Matrix4 Translate(const Vector3f& pos);
 
 		static Matrix4 Scale(float x, float y, float z);
 

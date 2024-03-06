@@ -1,10 +1,16 @@
 #include "Shader.h"
 #include "shader/BasicShader.h"
+#include "shader/LightShader.h"
+#include "shader/Blinn_PhongShader.h"
 namespace PIRenderer {
 	Shader* Shader::Create(const std::string& name)
 	{
 		if (name == "BasicShader")
 			return new BasicShader();
+		else if (name == "LightShader")
+			return new LightShader();
+		else if (name == "Blinn_PhongShader")
+			return new Blinn_PhongShader();
 
 		return nullptr;
 	}

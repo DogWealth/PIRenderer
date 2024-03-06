@@ -6,6 +6,7 @@
 #include "Renderer.h"
 #include "Mesh.h"
 #include "CameraController.h"
+#include "Light.h"
 namespace PIRenderer {
 	class Application
 	{
@@ -26,9 +27,11 @@ namespace PIRenderer {
 
 		Mesh* m_Mesh;
 		Mesh* m_HeadMesh;
+		Mesh* m_LightMesh;
 
 		Shader* m_Shader;
 		Shader* m_HeadShader;
+		Shader* m_LightShader;
 
 		Texture* m_Texture;
 		Texture* m_HeadTexture;

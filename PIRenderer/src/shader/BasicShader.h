@@ -17,6 +17,9 @@ namespace PIRenderer {
 		virtual void SetVPMatrix(Matrix4 vpMatrix) override;
 		virtual void SetModelMatrix(Matrix4 Model) override;
 
+		virtual void SetLight(DirectionLight dLight) override;
+		virtual void SetEyePos(const Vector3f eyepos) override;
+
 	protected:
 		void Vertex_rhw_Init(V2F* v2f);
 
@@ -27,6 +30,7 @@ namespace PIRenderer {
 		Texture* m_Texture;
 		Matrix4 m_VPMatrix;
 		Matrix4 m_ModelMatrix;
+		Matrix4 m_NormalMatrix;
 	};
 }
 
