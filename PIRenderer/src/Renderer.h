@@ -12,7 +12,7 @@ namespace PIRenderer {
 	class Renderer
 	{
 	public:
-		Renderer(uint32_t* framBuffer, int width, int height);
+		Renderer(uint32_t* framBuffer, float* depthBuffer, int width, int height);
 		~Renderer();
 
 		void SetPixel(int x, int y, float z, uint32_t color);
@@ -39,6 +39,10 @@ namespace PIRenderer {
 		void Clear();
 
 		void AddMesh(Mesh* mesh);
+
+		void SetDepthBuffer(float* depthBuffer);
+		void SetViewPort(int width, int height);
+
 
 	private:
 		void ViewPort(Vector3f* pos);

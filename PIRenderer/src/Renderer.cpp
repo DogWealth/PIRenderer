@@ -3,17 +3,17 @@
 #include <algorithm>
 #include <time.h>
 namespace PIRenderer {
-	Renderer::Renderer(uint32_t* framBuffer, int width, int height)
+	Renderer::Renderer(uint32_t* framBuffer, float* depthBuffer, int width, int height)
 		: m_FramBuffer(framBuffer), m_Width(width), m_Height(height)
 	{
-		m_DepthBuffer = new float[width * height];
+		m_DepthBuffer = depthBuffer;
 
 		m_Shader = nullptr;
 	}
 
 	Renderer::~Renderer()
 	{
-		delete[] m_DepthBuffer;
+		//delete[] m_DepthBuffer;
 	}
 
 	void Renderer::SetPixel(int x, int y, float z, uint32_t color)
@@ -34,9 +34,9 @@ namespace PIRenderer {
 	void Renderer::SetPixel(int x, int y, float z, const Vector3f& color)
 	{
 		uint32_t A = 0.0f;
-		uint32_t R = (uint32_t)(color.x * 255.f);
-		uint32_t G = (uint32_t)(color.y * 255.f);
-		uint32_t B = (uint32_t)(color.z * 255.f);
+		uint32_t R = (uint32_t)(std::min(color.x, 1.0f) * 255.f);
+		uint32_t G = (uint32_t)(std::min(color.y, 1.0f) * 255.f);
+		uint32_t B = (uint32_t)(std::min(color.z, 1.0f) * 255.f);
 
 		uint32_t Color = A | (R << 16) | (G << 8) | B;
 
@@ -152,21 +152,21 @@ namespace PIRenderer {
 			v->m_Normal /= rhw_z;
 			v->m_Texcoord /= rhw_z;
 
-			//Early-Z
-			int index = (int)v->m_ScreenPos.y * m_Width + (int)v->m_ScreenPos.x;
+			////Early-Z
+			//int index = (int)v->m_ScreenPos.y * m_Width + (int)v->m_ScreenPos.x;
 
-			//cliping
-			if (index < 0 || index >= m_Width * m_Height)
-			{
-				continue;
-			}
+			////cliping
+			//if (index < 0 || index >= m_Width * m_Height)
+			//{
+			//	continue;
+			//}
 
-			float depth = m_DepthBuffer[index];
-			if (depth < v->m_ScreenPos.z)
-			{
-				continue;
-			}
-			m_DepthBuffer[index] = v->m_ScreenPos.z;
+			//float depth = m_DepthBuffer[index];
+			//if (depth < v->m_ScreenPos.z)
+			//{
+			//	continue;
+			//}
+			//m_DepthBuffer[index] = v->m_ScreenPos.z;
 
 			m_Shader->FragmentShader(v);
 
@@ -327,10 +327,22 @@ namespace PIRenderer {
 		m_Meshs.push_back(mesh);
 	}
 
+	void Renderer::SetDepthBuffer(float* depthBuffer)
+	{
+		m_DepthBuffer = depthBuffer;
+	}
+
+
 	void Renderer::ViewPort(Vector3f* pos)
 	{
 		pos->x = (pos->x + 1.0f) * 0.5f * m_Width;
 		pos->y = (1.0f - pos->y) * 0.5f * m_Height; //坐标反转了
+	}
+
+	void Renderer::SetViewPort(int width, int height)
+	{
+		m_Width = width;
+		m_Height = height;
 	}
 
 	//背面剔除

@@ -2,6 +2,7 @@
 #include "shader/BasicShader.h"
 #include "shader/LightShader.h"
 #include "shader/Blinn_PhongShader.h"
+#include "shader/SimpleDepthShader.h"
 namespace PIRenderer {
 	Shader* Shader::Create(const std::string& name)
 	{
@@ -11,6 +12,8 @@ namespace PIRenderer {
 			return new LightShader();
 		else if (name == "Blinn_PhongShader")
 			return new Blinn_PhongShader();
+		else if (name == "SimpleDepthShader")
+			return new SimpleDepthShader();
 
 		return nullptr;
 	}

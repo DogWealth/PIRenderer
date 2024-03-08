@@ -15,7 +15,7 @@ namespace PIRenderer {
 		~Application();
 
 		void Run();
-		void OnUpdate();
+		void OnUpdate(double tick);
 		void OnEvent();
 
 		void Render();
@@ -32,9 +32,13 @@ namespace PIRenderer {
 		Shader* m_Shader;
 		Shader* m_HeadShader;
 		Shader* m_LightShader;
+		Shader* m_SimpleDepthShader;
 
 		Texture* m_Texture;
 		Texture* m_HeadTexture;
+
+		float* m_DepthBuffer;
+		float* m_ShadowMap;
 
 		PerspectiveCameraController* m_Controller;
 		//OrthographicCameraController* m_Controller;

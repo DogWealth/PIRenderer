@@ -37,7 +37,7 @@ namespace PIRenderer {
 	{
 	}
 
-	void PerspectiveCameraController::OnUpdate()
+	void PerspectiveCameraController::OnUpdate(double tick)
 	{
 		if (Input::IsKeyPressed(SDL_SCANCODE_A))
 			m_CameraPosition.x -= m_CameraTranslationSpeed;
@@ -61,35 +61,35 @@ namespace PIRenderer {
 		m_Camera.SetPosition(m_CameraPosition);
 	}
 
-	void OrbitController::OnUpdate()
+	void OrbitController::OnUpdate(double tick)
 	{
 		if (Input::IsKeyPressed(SDL_SCANCODE_LEFT))
 		{
-			Theta -= m_CameraRotationSpeed;
+			Theta -= m_CameraRotationSpeed * tick;
 		}
 
 		if (Input::IsKeyPressed(SDL_SCANCODE_RIGHT))
 		{
-			Theta += m_CameraRotationSpeed;
+			Theta += m_CameraRotationSpeed * tick;
 		}
 
 		if (Input::IsKeyPressed(SDL_SCANCODE_UP))
 		{
-			Phi += m_CameraRotationSpeed;
+			Phi += m_CameraRotationSpeed * tick;
 			Phi = MIN(90, Phi);
 		}
 
 		if (Input::IsKeyPressed(SDL_SCANCODE_DOWN))
 		{
-			Phi -= m_CameraRotationSpeed;
+			Phi -= m_CameraRotationSpeed * tick;
 			Phi = MAX(-90, Phi);
 		}
 
 		if (Input::IsKeyPressed(SDL_SCANCODE_W))
-			Radius -= m_CameraTranslationSpeed;
+			Radius -= m_CameraTranslationSpeed * tick;
 
 		if (Input::IsKeyPressed(SDL_SCANCODE_S))
-			Radius += m_CameraTranslationSpeed;
+			Radius += m_CameraTranslationSpeed * tick;
 
 
 		m_CameraPosition.x = Radius * sin(Theta * PI / 180.0f) * cos(Phi * PI / 180.0f);

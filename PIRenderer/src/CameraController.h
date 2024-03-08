@@ -27,7 +27,7 @@ namespace PIRenderer {
 	public:
 		PerspectiveCameraController(float n, float f, float fov, float aspectRatio);
 
-		virtual void OnUpdate();
+		virtual void OnUpdate(double tick);
 
 		PerspectiveCamera& GetCamera() { return m_Camera; }
 		const PerspectiveCamera& GetCamera() const { return m_Camera; }
@@ -37,8 +37,8 @@ namespace PIRenderer {
 		Vector3f m_CameraPosition = { 0.f, 0.f, 30.f };
 		Vector3f m_CameraRotation = { 0.f, 0.f, 0.f };
 
-		float m_CameraTranslationSpeed = 0.05f;
-		float m_CameraRotationSpeed = 1.f;
+		float m_CameraTranslationSpeed = 0.005f;
+		float m_CameraRotationSpeed = 0.1f;
 	};
 
 	class OrbitController : public PerspectiveCameraController
@@ -50,7 +50,7 @@ namespace PIRenderer {
 
 		}
 
-		virtual void OnUpdate() override;
+		virtual void OnUpdate(double tick) override;
 
 	private:
 		float Radius = 5;
