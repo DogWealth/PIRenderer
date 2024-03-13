@@ -22,6 +22,8 @@ namespace PIRenderer {
 		int m_Height;
 
 		SDL_Surface* m_Surface;
+
+	public:
 		SDL_Window* m_Window;
 
 	};

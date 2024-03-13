@@ -33,9 +33,11 @@ namespace PIRenderer {
 		Shader* m_HeadShader;
 		Shader* m_LightShader;
 		Shader* m_SimpleDepthShader;
+		Shader* m_SkyBoxShader;
 
 		Texture* m_Texture;
 		Texture* m_HeadTexture;
+		CubeMap* m_CubeMap;
 
 		float* m_DepthBuffer;
 		float* m_ShadowMap;

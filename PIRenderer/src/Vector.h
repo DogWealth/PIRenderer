@@ -332,6 +332,11 @@ namespace PIRenderer {
 			return Vector2(u * k, v * k);
 		}
 
+		float operator*(Vector2 v) const
+		{
+			return this->u * v.u + this->v * v.v;
+		}
+
 		Vector2 operator*=(float k)
 		{
 			this->u *= k;

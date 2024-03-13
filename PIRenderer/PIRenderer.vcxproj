@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\shader\SkyBoxShader.cpp" />
     <ClCompile Include="src\shader\SimpleDepthShader.cpp" />
     <ClCompile Include="src\shader\LightShader.cpp" />
     <ClCompile Include="src\shader\Blinn_PhongShader.cpp" />
@@ -160,6 +161,8 @@
     <ClCompile Include="src\Texture.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\shader\SkyBoxShader.h" />
+    <ClInclude Include="src\math.h" />
     <ClInclude Include="src\shader\SimpleDepthShader.h" />
     <ClInclude Include="src\shader\LightShader.h" />
     <ClInclude Include="src\shader\Blinn_PhongShader.h" />

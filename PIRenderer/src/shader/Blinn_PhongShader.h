@@ -10,10 +10,13 @@ namespace PIRenderer {
 		void SetEyePos(const Vector3f& eyepos);
 		void SetShaowMap(float* shadowMap, int width, int height);
 		void UseShadow(bool use);
+		void UsePCF(bool use);
+		void UsePCSS(bool use);
 		void SetLightSpaceMatrix(const Matrix4& m);
 
 	private:
 		float ShadowClaculation(const Vector3f& worldPos);
+		float findBlocker(int x, int y, float zReceiver);
 
 	private:
 		Vector3f m_EyePos;
@@ -22,6 +25,8 @@ namespace PIRenderer {
 		int m_SMWidth;
 		int m_SMHeight;
 		bool m_UseShadow = false;
+		bool m_UsePCF = false;
+		bool m_UsePCSS = false;
 	};
 }
 

@@ -1,5 +1,6 @@
 #include "Application.h"
 #include "shader/Blinn_PhongShader.h"
+#include "shader/SkyBoxShader.h"
 #define WIDTH	800.0f
 #define HEIGHT	600.0f
 
@@ -14,8 +15,8 @@ namespace PIRenderer {
 		m_Renderer = new PIRenderer::Renderer(frameBuffer, m_DepthBuffer, WIDTH, HEIGHT);
 		m_Mesh = new PIRenderer::Mesh("obj/floor.obj");//注意相对路径时相对PIRenderer这个文件夹开始的
 		m_Shader = PIRenderer::Shader::Create("Blinn_PhongShader");
-		m_Texture = new PIRenderer::Texture("obj/floor_diffuse.tga");
-		m_Controller = new PIRenderer::OrbitController(1, 50, 90, WIDTH / HEIGHT);
+		m_Texture = new PIRenderer::Texture("obj/cubemap/posy.tga");
+		m_Controller = new PIRenderer::OrbitController(0.1, 50, 90, WIDTH / HEIGHT);
 
 		m_HeadMesh = new PIRenderer::Mesh("obj/african_head.obj");
 		m_HeadShader = PIRenderer::Shader::Create("Blinn_PhongShader");
@@ -32,6 +33,22 @@ namespace PIRenderer {
 		
 		//m_Shader->SetTexture(m_Texture);
 		m_HeadShader->SetTexture(m_HeadTexture);
+
+		Texture* posx = new PIRenderer::Texture("obj/cubemap/SkyBox/posx.tga");
+		Texture* posy = new PIRenderer::Texture("obj/cubemap/SkyBox/posy.tga");
+		Texture* posz = new PIRenderer::Texture("obj/cubemap/SkyBox/posz.tga");
+		Texture* negx = new PIRenderer::Texture("obj/cubemap/SkyBox/negx.tga");
+		Texture* negy = new PIRenderer::Texture("obj/cubemap/SkyBox/negy.tga");
+		Texture* negz = new PIRenderer::Texture("obj/cubemap/SkyBox/negz.tga");
+
+		m_CubeMap = new PIRenderer::CubeMap(posx, posy, posz, negx, negy, negz);
+
+		m_SkyBoxShader = PIRenderer::Shader::Create("SkyBoxShader");
+
+		dynamic_cast<SkyBoxShader*>(m_SkyBoxShader)->SetCubeMap(m_CubeMap);
+
+		//test 调试用
+		//m_Renderer->m_Window = m_Window->m_Window;
 	}
 
 	Application::~Application()
@@ -50,6 +67,9 @@ namespace PIRenderer {
 		delete m_DepthBuffer;
 		delete m_ShadowMap;
 		delete m_SimpleDepthShader;
+		m_CubeMap->DelteAllTextures();
+		delete m_CubeMap;
+		delete m_SkyBoxShader;
 	}
 
 	void Application::Run()
@@ -70,16 +90,14 @@ namespace PIRenderer {
 
 	void Application::OnUpdate(double tick)
 	{
-		m_Renderer->Clear();
-
 		m_Controller->OnUpdate(tick);
 		Matrix4 VPMatrix = m_Controller->GetCamera().GetViewProjectionMatrix();
 		Matrix4 ModelMatrix = Matrix4::Scale(0.1, 0.1, 0.1) * Matrix4::RotateX(90) * Matrix4::Translate(0, -1, 0);
 		Matrix4 HeadModelMatrix = Matrix4::Scale(1, 1, 1);
 
-		Vector3f lightPos = { (float)(2 * sin(clock() / 10 * PI / 180.0f) * cos(60 * PI / 180.0f)),
-								(float)(2 * sin(60 * PI / 180.0f)),
-								(float)(2 * cos(clock() / 10 * PI / 180.0f) * cos(60 * PI / 180.0f)) };
+		Vector3f lightPos = { (float)(2 * sin(clock() / 10 * PI / 180.0f) * cos(45 * PI / 180.0f)),
+								(float)(2 * sin(45 * PI / 180.0f)),
+								(float)(2 * cos(clock() / 10 * PI / 180.0f) * cos(45 * PI / 180.0f)) };
 
 		DirectionLight dLight = { -lightPos, lightPos, 1};
 
@@ -89,7 +107,7 @@ namespace PIRenderer {
 									Matrix4::Orthographic(-5, 5, -5, 5, 50, 1);
 
 		//caculate shadowmap
-		m_Renderer->SetDepthBuffer(m_ShadowMap);
+		/*m_Renderer->SetDepthBuffer(m_ShadowMap);
 		m_Renderer->Clear();
 
 		m_Renderer->BindShader(m_SimpleDepthShader);
@@ -102,14 +120,33 @@ namespace PIRenderer {
 
 		dynamic_cast<Blinn_PhongShader*>(m_Shader)->SetShaowMap(m_ShadowMap, WIDTH, HEIGHT);
 		dynamic_cast<Blinn_PhongShader*>(m_Shader)->UseShadow(true);
+		dynamic_cast<Blinn_PhongShader*>(m_Shader)->UsePCF(true);
+		dynamic_cast<Blinn_PhongShader*>(m_Shader)->UsePCSS(false);
 		dynamic_cast<Blinn_PhongShader*>(m_Shader)->SetLightSpaceMatrix(LightSpaceMatrix);
 
+		dynamic_cast<Blinn_PhongShader*>(m_HeadShader)->SetShaowMap(m_ShadowMap, WIDTH, HEIGHT);
+		dynamic_cast<Blinn_PhongShader*>(m_HeadShader)->UseShadow(true);
+		dynamic_cast<Blinn_PhongShader*>(m_HeadShader)->SetLightSpaceMatrix(LightSpaceMatrix);*/
 
-		//common render
+
 		m_Renderer->SetDepthBuffer(m_DepthBuffer);
 		m_Renderer->Clear();
 
-		m_Shader->SetLight(dLight);
+		//SkyBox
+		Matrix4 SkyVMatrix = m_Controller->GetCamera().GetViewMatrix();
+		Matrix4 SkyPMatrix = m_Controller->GetCamera().GetProjectionMatrix();
+
+		SkyVMatrix.m_Mat[3][0] = 0;
+		SkyVMatrix.m_Mat[3][1] = 0;
+		SkyVMatrix.m_Mat[3][2] = 0;
+
+		m_Renderer->BindShader(m_SkyBoxShader);
+		m_SkyBoxShader->SetVPMatrix(SkyVMatrix * SkyPMatrix);
+		Render(m_LightMesh);
+
+		//common render
+
+		/*m_Shader->SetLight(dLight);
 		m_HeadShader->SetLight(dLight);
 
 		m_Renderer->BindShader(m_Shader);
@@ -129,7 +166,7 @@ namespace PIRenderer {
 		m_LightShader->SetModelMatrix(LightModelMatrix);
 		m_LightShader->SetEyePos(m_Controller->GetCamera().GetPosition());
 
-		Render(m_LightMesh);
+		Render(m_LightMesh);*/
 
 		m_Window->OnUpdate();
 	}

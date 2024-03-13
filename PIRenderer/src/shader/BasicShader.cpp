@@ -12,7 +12,7 @@ namespace PIRenderer {
 	BasicShader::~BasicShader()
 	{
 	}
-
+	 
 	V2F BasicShader::VertexShader(const Vertex& v)
 	{
 		//VertexShader中不应该执行透视除法，透视除法是一个单独的过程，VertexShader输出的是四维齐次坐标
@@ -39,7 +39,7 @@ namespace PIRenderer {
 		if (intensity > 0)
 		{
 			if (m_Texture)
-				v->m_Color = *(m_Texture->Sample(v->m_Texcoord.u, v->m_Texcoord.v)) * intensity;
+				v->m_Color = (m_Texture->Sample(v->m_Texcoord.u, v->m_Texcoord.v)) * intensity;
 			else
 				v->m_Color = { 1, 1, 1 };
 		}

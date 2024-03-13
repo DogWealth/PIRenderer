@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <SDL.h>
 #include "Matrix.h"
 #include "Vertex.h"
 #include "Vector.h"
@@ -55,6 +56,7 @@ namespace PIRenderer {
 		V2F Intersect(const V2F& v1, const V2F& v2, const Vector3f& plane);
 		std::vector<V2F> SutherlandHodgeman(const V2F& v1, const V2F& v2, const V2F& v3);//需要优化
 
+
 	private:
 		uint32_t* m_FramBuffer;
 		float* m_DepthBuffer;
@@ -77,5 +79,8 @@ namespace PIRenderer {
 			//bottom plane
 			{0, 1, 0, 1}
 		};
+
+	public:
+		SDL_Window* m_Window;//调试用
 	};
 }

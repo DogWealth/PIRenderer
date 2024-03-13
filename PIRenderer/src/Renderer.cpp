@@ -170,7 +170,8 @@ namespace PIRenderer {
 
 			m_Shader->FragmentShader(v);
 
-			SetPixel(v->m_ScreenPos.x, v->m_ScreenPos.y, v->m_ScreenPos.z, v->m_Color);
+			//存在精度问题，给个bias，本来应该是49，结果48.99xxx，导致变成48，导致少画一条横线
+			SetPixel(v->m_ScreenPos.x, v->m_ScreenPos.y + 0.001, v->m_ScreenPos.z, v->m_Color);
 		}
 	}
 
@@ -282,7 +283,7 @@ namespace PIRenderer {
 				PerspectiveDivision(&v3);
 
 				//back face culling
-				if (!FaceCulling(v1.m_ScreenPos, v2.m_ScreenPos, v3.m_ScreenPos)) continue;
+				//if (!FaceCulling(v1.m_ScreenPos, v2.m_ScreenPos, v3.m_ScreenPos)) continue;
 
 				ViewPort(&v1.m_ScreenPos);
 				ViewPort(&v2.m_ScreenPos);

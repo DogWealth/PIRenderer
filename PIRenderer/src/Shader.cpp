@@ -3,6 +3,7 @@
 #include "shader/LightShader.h"
 #include "shader/Blinn_PhongShader.h"
 #include "shader/SimpleDepthShader.h"
+#include "shader/SkyBoxShader.h"
 namespace PIRenderer {
 	Shader* Shader::Create(const std::string& name)
 	{
@@ -14,6 +15,8 @@ namespace PIRenderer {
 			return new Blinn_PhongShader();
 		else if (name == "SimpleDepthShader")
 			return new SimpleDepthShader();
+		else if (name == "SkyBoxShader")
+			return new SkyBoxShader();
 
 		return nullptr;
 	}
