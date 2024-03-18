@@ -1,4 +1,5 @@
 #include "Application.h"
+#include "math.h"
 #include "shader/Blinn_PhongShader.h"
 #include "shader/SkyBoxShader.h"
 #define WIDTH	800.0f
@@ -8,7 +9,9 @@ namespace PIRenderer {
 	Application::Application()
 	{
 		m_DepthBuffer = new float[WIDTH * HEIGHT];
+		m_DepthSquareBuffer = new float[WIDTH * HEIGHT];
 		m_ShadowMap = new float[WIDTH * HEIGHT];
+
 		m_Window = new Window(WIDTH, HEIGHT, "PI Renderer");
 
 		uint32_t* frameBuffer = (uint32_t*)(m_Window->GetSurface()->pixels);
@@ -47,6 +50,10 @@ namespace PIRenderer {
 
 		dynamic_cast<SkyBoxShader*>(m_SkyBoxShader)->SetCubeMap(m_CubeMap);
 
+		//vssm
+		m_ExSAT = new std::vector<std::vector<double>>(HEIGHT, std::vector<double>(WIDTH, 0));
+		m_ExSquareSAT = new std::vector<std::vector<double>>(HEIGHT, std::vector<double>(WIDTH, 0));
+
 		//test 调试用
 		//m_Renderer->m_Window = m_Window->m_Window;
 	}
@@ -64,12 +71,15 @@ namespace PIRenderer {
 		delete m_HeadTexture;
 		delete m_LightMesh;
 		delete m_LightShader;
-		delete m_DepthBuffer;
-		delete m_ShadowMap;
+		delete[] m_DepthBuffer;
+		delete[] m_ShadowMap;
+		delete[] m_DepthSquareBuffer;
 		delete m_SimpleDepthShader;
 		m_CubeMap->DelteAllTextures();
 		delete m_CubeMap;
 		delete m_SkyBoxShader;
+		delete m_ExSAT;
+		delete m_ExSquareSAT;
 	}
 
 	void Application::Run()
@@ -99,6 +109,7 @@ namespace PIRenderer {
 								(float)(2 * sin(45 * PI / 180.0f)),
 								(float)(2 * cos(clock() / 10 * PI / 180.0f) * cos(45 * PI / 180.0f)) };
 
+
 		DirectionLight dLight = { -lightPos, lightPos, 1};
 
 		Matrix4 LightModelMatrix = Matrix4::Scale(0.1, 0.1, 0.1) *  Matrix4::Translate(dLight.GetPosition());
@@ -107,7 +118,9 @@ namespace PIRenderer {
 									Matrix4::Orthographic(-5, 5, -5, 5, 50, 1);
 
 		//caculate shadowmap
-		/*m_Renderer->SetDepthBuffer(m_ShadowMap);
+		m_Renderer->SetDepthBuffer(m_ShadowMap);
+		m_Renderer->SetDepthSquareBuffer(m_DepthSquareBuffer);//这个每次也要绑定跟新
+		m_Renderer->UseDepthTest(true);
 		m_Renderer->Clear();
 
 		m_Renderer->BindShader(m_SimpleDepthShader);
@@ -118,22 +131,32 @@ namespace PIRenderer {
 		m_SimpleDepthShader->SetModelMatrix(ModelMatrix);
 		Render(m_Mesh);
 
+
+		GetSummedAreaTable(m_ExSAT, m_ShadowMap, WIDTH, HEIGHT);
+		GetSummedAreaTable(m_ExSquareSAT, m_DepthSquareBuffer, WIDTH, HEIGHT);
+
+		//return;
+
+		dynamic_cast<Blinn_PhongShader*>(m_Shader)->SetExSAT(m_ExSAT);
+		dynamic_cast<Blinn_PhongShader*>(m_Shader)->SetExSquareSAT(m_ExSquareSAT);
+
 		dynamic_cast<Blinn_PhongShader*>(m_Shader)->SetShaowMap(m_ShadowMap, WIDTH, HEIGHT);
 		dynamic_cast<Blinn_PhongShader*>(m_Shader)->UseShadow(true);
-		dynamic_cast<Blinn_PhongShader*>(m_Shader)->UsePCF(true);
+		dynamic_cast<Blinn_PhongShader*>(m_Shader)->UsePCF(false);
 		dynamic_cast<Blinn_PhongShader*>(m_Shader)->UsePCSS(false);
+		dynamic_cast<Blinn_PhongShader*>(m_Shader)->UseVSSM(true);
 		dynamic_cast<Blinn_PhongShader*>(m_Shader)->SetLightSpaceMatrix(LightSpaceMatrix);
 
 		dynamic_cast<Blinn_PhongShader*>(m_HeadShader)->SetShaowMap(m_ShadowMap, WIDTH, HEIGHT);
-		dynamic_cast<Blinn_PhongShader*>(m_HeadShader)->UseShadow(true);
-		dynamic_cast<Blinn_PhongShader*>(m_HeadShader)->SetLightSpaceMatrix(LightSpaceMatrix);*/
+		dynamic_cast<Blinn_PhongShader*>(m_HeadShader)->UseShadow(false);
+		dynamic_cast<Blinn_PhongShader*>(m_HeadShader)->SetLightSpaceMatrix(LightSpaceMatrix);
 
-
+		m_Renderer->SetDepthSquareBuffer(nullptr);
 		m_Renderer->SetDepthBuffer(m_DepthBuffer);
 		m_Renderer->Clear();
 
 		//SkyBox
-		Matrix4 SkyVMatrix = m_Controller->GetCamera().GetViewMatrix();
+		/*Matrix4 SkyVMatrix = m_Controller->GetCamera().GetViewMatrix();
 		Matrix4 SkyPMatrix = m_Controller->GetCamera().GetProjectionMatrix();
 
 		SkyVMatrix.m_Mat[3][0] = 0;
@@ -142,11 +165,17 @@ namespace PIRenderer {
 
 		m_Renderer->BindShader(m_SkyBoxShader);
 		m_SkyBoxShader->SetVPMatrix(SkyVMatrix * SkyPMatrix);
-		Render(m_LightMesh);
+
+		m_Renderer->UseBackFaceCulling(false);
+		m_Renderer->UseDepthTest(false);
+
+		Render(m_LightMesh);*/
 
 		//common render
+		m_Renderer->UseBackFaceCulling(true);
+		m_Renderer->UseDepthTest(true);
 
-		/*m_Shader->SetLight(dLight);
+		m_Shader->SetLight(dLight);
 		m_HeadShader->SetLight(dLight);
 
 		m_Renderer->BindShader(m_Shader);
@@ -161,12 +190,14 @@ namespace PIRenderer {
 
 		Render(m_HeadMesh);
 
+
+		//light
 		m_Renderer->BindShader(m_LightShader);
 		m_LightShader->SetVPMatrix(VPMatrix);
 		m_LightShader->SetModelMatrix(LightModelMatrix);
 		m_LightShader->SetEyePos(m_Controller->GetCamera().GetPosition());
 
-		Render(m_LightMesh);*/
+		Render(m_LightMesh);
 
 		m_Window->OnUpdate();
 	}

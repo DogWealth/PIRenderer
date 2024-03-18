@@ -42,7 +42,11 @@ namespace PIRenderer {
 		void AddMesh(Mesh* mesh);
 
 		void SetDepthBuffer(float* depthBuffer);
+		void SetDepthSquareBuffer(float* depthSquareBuffer);
 		void SetViewPort(int width, int height);
+
+		void UseBackFaceCulling(bool use);
+		void UseDepthTest(bool use);
 
 
 	private:
@@ -60,6 +64,7 @@ namespace PIRenderer {
 	private:
 		uint32_t* m_FramBuffer;
 		float* m_DepthBuffer;
+		float* m_DepthSquareBuffer;
 		Shader* m_Shader;
 		std::vector<Mesh*> m_Meshs;
 		DirectionLight m_DirectionLight;
@@ -79,6 +84,9 @@ namespace PIRenderer {
 			//bottom plane
 			{0, 1, 0, 1}
 		};
+
+		bool m_UseBackCulling = false;
+		bool m_UseDepthTest = true;
 
 	public:
 		SDL_Window* m_Window;//µ˜ ‘”√

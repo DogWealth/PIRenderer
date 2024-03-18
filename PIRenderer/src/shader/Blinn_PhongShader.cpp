@@ -67,13 +67,22 @@ void PIRenderer::Blinn_PhongShader::UseShadow(bool use)
 void PIRenderer::Blinn_PhongShader::UsePCF(bool use)
 {
 	m_UsePCF = use;
-	m_UsePCSS = !use;
+	m_UsePCSS = (use == true ? false : m_UsePCSS);
+	m_UseVSSM = (use == true ? false : m_UseVSSM);
 }
 
 void PIRenderer::Blinn_PhongShader::UsePCSS(bool use)
 {
 	m_UsePCSS = use;
-	m_UsePCF = !use;
+	m_UsePCF = (use == true ? false : m_UsePCF);
+	m_UseVSSM = (use == true ? false : m_UseVSSM);
+}
+
+void PIRenderer::Blinn_PhongShader::UseVSSM(bool use)
+{
+	m_UsePCF = (use == true ? false : m_UsePCF);
+	m_UsePCSS = (use == true ? false : m_UsePCSS);
+	m_UseVSSM = use;
 }
 
 void PIRenderer::Blinn_PhongShader::SetLightSpaceMatrix(const Matrix4& m)
@@ -81,10 +90,21 @@ void PIRenderer::Blinn_PhongShader::SetLightSpaceMatrix(const Matrix4& m)
 	m_LightSpace = m;
 }
 
+void PIRenderer::Blinn_PhongShader::SetExSAT(std::vector<std::vector<double>>* ExSAT)
+{
+	m_ExSAT = ExSAT;
+}
+
+void PIRenderer::Blinn_PhongShader::SetExSquareSAT(std::vector<std::vector<double>>* ExSquareSAT)
+{
+	m_ExSquareSAT = ExSquareSAT;
+}
+
+
 float PIRenderer::Blinn_PhongShader::ShadowClaculation(const Vector3f& worldPos)
 {
 	Vector3f lightSpacePos = worldPos * m_LightSpace;
-	float visibility = 0.0;
+	float shadow = 0.0;
 
 	lightSpacePos.x /= lightSpacePos.w;
 	lightSpacePos.y /= lightSpacePos.w;
@@ -95,22 +115,19 @@ float PIRenderer::Blinn_PhongShader::ShadowClaculation(const Vector3f& worldPos)
 	float closestDepth = m_ShadowMap[y * m_SMWidth + x];
 	float currentDepth = lightSpacePos.z;
 
-	visibility = (currentDepth - 0.005 > closestDepth ? 1.0f : 0.0f);
-
 	//PCF
 	if (m_UsePCF)
 	{
-		visibility = 0.0f;
 		for(int i = -1; i <= 1; ++i)
 			for (int j = -1; j <= 1; ++j)
 			{
 				int nx = x + i;
 				int ny = y + j;
 				closestDepth = m_ShadowMap[ny * m_SMWidth + nx];
-				visibility += (currentDepth - 0.005 > closestDepth ? 1.0f : 0.0f);
+				shadow += (currentDepth - 0.005 > closestDepth ? 1.0f : 0.0f);
 			}
 
-		return visibility / 9.0f;
+		return shadow / 9.0f;
 	}
 	//PCSS
 	else if (m_UsePCSS)
@@ -131,19 +148,57 @@ float PIRenderer::Blinn_PhongShader::ShadowClaculation(const Vector3f& worldPos)
 		float penumbra = lightSize * (zReceiver - aveBlockDepth) / aveBlockDepth;
 
 		//3. pcf
-		visibility = 0.0f;
 		for (int i = 0; i < numSample; ++i)
 		{
-			int nx = x + poissonDisk[i].u * 2;
-			int ny = y + poissonDisk[i].v * 2;
+			int nx = x + poissonDisk[i].u * penumbra;
+			int ny = y + poissonDisk[i].v * penumbra;
 
 			closestDepth = m_ShadowMap[ny * m_SMWidth + nx];
-			visibility += (currentDepth - 0.005 > closestDepth ? 1.0f : 0.0f);
+			shadow += (currentDepth - 0.005 > closestDepth ? 1.0f : 0.0f);
 		}
 
-		return visibility / (float)numSample;
+		return shadow / (float)numSample;
 	}
-	return visibility;
+	//vssm
+	else if (m_UseVSSM)
+	{
+		//1. find blocker depth
+		float lightSize = 50;
+		float nearPlane = -0.9;
+		//搜索半径不能用浮点数，不然在前缀和减法的时候会出现区域下标错误的情况
+		int searchRadius = abs(lightSize * (currentDepth - nearPlane) / currentDepth) + 0.5;
+		float ex, var;
+		AreaSerach(&ex, &var, x, y, searchRadius);
+		if (currentDepth <= ex) 
+			return 0.0f;
+
+		float zUnocc = currentDepth;
+		float zAvg = ex;
+		float pzUnocc = var / (var + (currentDepth - ex) * (currentDepth - ex));
+		float pzOcc = 1.0 - pzUnocc;
+		if (pzOcc == 0) 
+			return 0.0;
+
+		float zOcc = (zAvg - pzUnocc * zUnocc) / pzOcc;
+
+		//2. compute penumbra
+		float zReceiver = currentDepth;
+		float aveBlockDepth = zOcc;
+		int penumbra = abs(lightSize * (zReceiver - aveBlockDepth) / aveBlockDepth) + 0.5;
+
+
+		//3. pcf
+		AreaSerach(&ex, &var, x, y, penumbra);
+
+		if (currentDepth <= ex) return 0.0f;
+
+		shadow = 1.0 - var / (var + (currentDepth - ex) * (currentDepth - ex));
+		return shadow;
+	}
+
+	//普通的SM
+	shadow = (currentDepth - 0.005 > closestDepth ? 1.0f : 0.0f);
+	return shadow;
 }
 
 float PIRenderer::Blinn_PhongShader::findBlocker(int x, int y, float zReceiver)
@@ -170,4 +225,35 @@ float PIRenderer::Blinn_PhongShader::findBlocker(int x, int y, float zReceiver)
 
 	return blockDepth / (float)blockNums;
 
+}
+
+void PIRenderer::Blinn_PhongShader::AreaSerach(float* ex, float* var, float x, float y, int searchRadius)
+{
+	float ex_s;
+	float size = (2 * searchRadius + 1) * (2 * searchRadius + 1);
+
+	if (x - searchRadius - 1 < 0 || y - searchRadius - 1 < 0)
+	{
+		*ex = (*m_ExSAT)[y + searchRadius][x + searchRadius] /
+			((y + searchRadius + 1) * (x + searchRadius + 1));
+
+		ex_s = (*m_ExSquareSAT)[y + searchRadius][x + searchRadius] /
+			((y + searchRadius + 1) * (x + searchRadius + 1));
+	}
+	else
+	{
+		*ex =
+			((*m_ExSAT)[y + searchRadius][x + searchRadius] -
+				(*m_ExSAT)[y - searchRadius - 1][x + searchRadius] -
+				(*m_ExSAT)[y + searchRadius][x - searchRadius - 1] +
+				(*m_ExSAT)[y - searchRadius - 1][x - searchRadius - 1]) / size;
+
+		ex_s =
+			((*m_ExSquareSAT)[y + searchRadius][x + searchRadius] -
+				(*m_ExSquareSAT)[y - searchRadius - 1][x + searchRadius] -
+				(*m_ExSquareSAT)[y + searchRadius][x - searchRadius - 1] +
+				(*m_ExSquareSAT)[y - searchRadius - 1][x - searchRadius - 1]) / size;
+	}
+
+	*var = ex_s - (*ex) * (*ex);
 }

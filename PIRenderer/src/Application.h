@@ -40,7 +40,11 @@ namespace PIRenderer {
 		CubeMap* m_CubeMap;
 
 		float* m_DepthBuffer;
+		float* m_DepthSquareBuffer;
 		float* m_ShadowMap;
+
+		std::vector<std::vector<double>>* m_ExSAT;
+		std::vector<std::vector<double>>* m_ExSquareSAT;
 
 		PerspectiveCameraController* m_Controller;
 		//OrthographicCameraController* m_Controller;

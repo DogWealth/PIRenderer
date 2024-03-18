@@ -12,11 +12,15 @@ namespace PIRenderer {
 		void UseShadow(bool use);
 		void UsePCF(bool use);
 		void UsePCSS(bool use);
+		void UseVSSM(bool use);
 		void SetLightSpaceMatrix(const Matrix4& m);
+		void SetExSAT(std::vector<std::vector<double>>* ExSAT);
+		void SetExSquareSAT(std::vector<std::vector<double>>* ExSquareSAT);
 
 	private:
 		float ShadowClaculation(const Vector3f& worldPos);
 		float findBlocker(int x, int y, float zReceiver);
+		void AreaSerach(float* ex, float* var, float x, float y, int searchRadius);
 
 	private:
 		Vector3f m_EyePos;
@@ -27,6 +31,9 @@ namespace PIRenderer {
 		bool m_UseShadow = false;
 		bool m_UsePCF = false;
 		bool m_UsePCSS = false;
+		bool m_UseVSSM = false;
+		std::vector<std::vector<double>>* m_ExSAT;
+		std::vector<std::vector<double>>* m_ExSquareSAT;
 	};
 }
 

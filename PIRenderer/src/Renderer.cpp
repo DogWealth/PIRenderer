@@ -22,12 +22,15 @@ namespace PIRenderer {
 			return;
 
 		int index = y * m_Width + x;
-		float depth = m_DepthBuffer[index];
-		if (depth < z)
+
+		if (m_UseDepthTest && m_DepthBuffer)
 		{
-			return;
+			float depth = m_DepthBuffer[index];
+			if (depth < z) return;
+			m_DepthBuffer[index] = z;
+			if (m_DepthSquareBuffer) m_DepthSquareBuffer[index] = z * z;
 		}
-		m_DepthBuffer[index] = z;
+
 		m_FramBuffer[index] = color;
 	}
 
@@ -283,7 +286,7 @@ namespace PIRenderer {
 				PerspectiveDivision(&v3);
 
 				//back face culling
-				//if (!FaceCulling(v1.m_ScreenPos, v2.m_ScreenPos, v3.m_ScreenPos)) continue;
+				if (m_UseBackCulling && !FaceCulling(v1.m_ScreenPos, v2.m_ScreenPos, v3.m_ScreenPos)) continue;
 
 				ViewPort(&v1.m_ScreenPos);
 				ViewPort(&v2.m_ScreenPos);
@@ -319,7 +322,10 @@ namespace PIRenderer {
 	void Renderer::Clear()
 	{
 		memset(m_FramBuffer, 0, sizeof(uint32_t) * m_Width * m_Height);
-		std::fill(m_DepthBuffer, m_DepthBuffer + m_Width * m_Height, FLT_MAX);
+		if(m_DepthBuffer)
+			std::fill(m_DepthBuffer, m_DepthBuffer + m_Width * m_Height, 1.0f);
+		if(m_DepthSquareBuffer)
+			std::fill(m_DepthSquareBuffer, m_DepthSquareBuffer + m_Width * m_Height, 1.0f);
 
 	}
 
@@ -333,6 +339,11 @@ namespace PIRenderer {
 		m_DepthBuffer = depthBuffer;
 	}
 
+	void Renderer::SetDepthSquareBuffer(float* depthSquareBuffer)
+	{
+		m_DepthSquareBuffer = depthSquareBuffer;
+	}
+
 
 	void Renderer::ViewPort(Vector3f* pos)
 	{
@@ -344,6 +355,16 @@ namespace PIRenderer {
 	{
 		m_Width = width;
 		m_Height = height;
+	}
+
+	void Renderer::UseBackFaceCulling(bool use)
+	{
+		m_UseBackCulling = use;
+	}
+
+	void Renderer::UseDepthTest(bool use)
+	{
+		m_UseDepthTest = use;
 	}
 
 	//±³ÃæÌÞ³ý
