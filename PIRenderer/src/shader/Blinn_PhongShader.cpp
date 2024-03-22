@@ -27,6 +27,17 @@ void PIRenderer::Blinn_PhongShader::FragmentShader(V2F* v)
 
 	//Âþ·´Éä
 	Vector3f normal = Vector3f::Normalize(v->m_Normal);
+
+	if (m_NormalMap)
+	{
+		Vector3f tangent = Vector3f::Normalize(m_Tangent - (m_Tangent * normal) * normal);
+		Vector3f bitangent = Vector3f::CrossProduct(tangent, normal);
+		Matrix4 TBN = GetTBN(tangent, bitangent, normal);
+		normal = (m_NormalMap->Sample(v->m_Texcoord.u, v->m_Texcoord.v));
+		normal = (normal * 2.0f + -1.0f);
+		normal.Normalize();
+		normal = normal * TBN;
+	}
 	Vector3f lightDir = m_DirectionLight.GetDirection();
 	float Kd = 0.7;
 	float diff = std::max(normal * lightDir, 0.0f) * Kd;
@@ -45,6 +56,9 @@ void PIRenderer::Blinn_PhongShader::FragmentShader(V2F* v)
 	}
 	else
 		v->m_Color = objectColor * (ambient + diffuse + specular);
+
+	//tone mapping
+	//v->m_Color = (v->m_Color) / (v->m_Color + 1.0);
 }
 
 void PIRenderer::Blinn_PhongShader::SetEyePos(const Vector3f& eyepos)

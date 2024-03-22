@@ -140,6 +140,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\shader\PbrShader.cpp" />
     <ClCompile Include="src\shader\SkyBoxShader.cpp" />
     <ClCompile Include="src\shader\SimpleDepthShader.cpp" />
     <ClCompile Include="src\shader\LightShader.cpp" />
@@ -160,8 +161,12 @@
     <ClCompile Include="src\Vertex.cpp" />
     <ClCompile Include="src\Vector.cpp" />
     <ClCompile Include="src\Texture.cpp" />
+    <ClCompile Include="src\test\Test_Blinn_Phong.cpp" />
+    <ClCompile Include="src\test\Test_IBL.cpp" />
+    <ClCompile Include="src\test\Test_PBR.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\shader\PbrShader.h" />
     <ClInclude Include="src\shader\SkyBoxShader.h" />
     <ClInclude Include="src\math.h" />
     <ClInclude Include="src\shader\SimpleDepthShader.h" />
@@ -182,6 +187,9 @@
     <ClInclude Include="src\Vertex.h" />
     <ClInclude Include="src\Vector.h" />
     <ClInclude Include="src\Texture.h" />
+    <ClInclude Include="src\test\Test_Blinn_Phong.h" />
+    <ClInclude Include="src\test\Test_IBL.h" />
+    <ClInclude Include="src\test\Test_PBR.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

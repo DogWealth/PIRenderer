@@ -29,10 +29,12 @@ namespace PIRenderer {
 		void DrawTriangle(V2F* v1, V2F* v2, V2F* v3);//scanline
 
 		void DrawMeshLine(Mesh* mesh);
+		void DrawVertex(const std::vector<Vertex>& vertexs);
 		void DrawMesh(Mesh* mesh);
 
 		void DrawMeshLines();
 		void DrawMeshs();
+
 
 		void BindShader(Shader* shader);
 
@@ -87,8 +89,5 @@ namespace PIRenderer {
 
 		bool m_UseBackCulling = false;
 		bool m_UseDepthTest = true;
-
-	public:
-		SDL_Window* m_Window;//µ˜ ‘”√
 	};
 }

@@ -2,6 +2,7 @@
 #include <string>
 #include <algorithm>
 #include <time.h>
+#include "math.h"
 namespace PIRenderer {
 	Renderer::Renderer(uint32_t* framBuffer, float* depthBuffer, int width, int height)
 		: m_FramBuffer(framBuffer), m_Width(width), m_Height(height)
@@ -259,10 +260,8 @@ namespace PIRenderer {
 
 	}
 
-	void Renderer::DrawMesh(Mesh* mesh)
+	void Renderer::DrawVertex(const std::vector<Vertex>& vertexs)
 	{
-		const std::vector<Vertex>& vertexs = mesh->GetVertexBuffer();
-		
 		if (vertexs.size() == 0) return;
 
 		for (int i = 0; i < vertexs.size(); i += 3)
@@ -281,6 +280,9 @@ namespace PIRenderer {
 				v2 = vertices[j + 1];
 				v3 = vertices[j + 2];
 
+				Vector3f tangent = GetTangent(v1, v2, v3);
+				m_Shader->SetTangent(tangent);
+
 				PerspectiveDivision(&v1);
 				PerspectiveDivision(&v2);
 				PerspectiveDivision(&v3);
@@ -295,6 +297,14 @@ namespace PIRenderer {
 				DrawTriangle(&v1, &v2, &v3);
 			}
 		}
+	}
+
+	void Renderer::DrawMesh(Mesh* mesh)
+	{
+		const std::vector<Vertex>& vertexs = mesh->GetVertexBuffer();
+
+		DrawVertex(vertexs);
+		
 	}
 
 	void Renderer::DrawMeshLines()

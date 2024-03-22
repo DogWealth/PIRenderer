@@ -54,4 +54,73 @@ namespace PIRenderer {
 			}
 		}
 	}
+
+	inline Matrix4 GetTBN(const V2F& v1, const V2F& v2, const V2F& v3)
+	{
+		Vector3f edge1 = v2.m_WorldPos - v1.m_WorldPos;
+		Vector3f edge2 = v3.m_WorldPos - v1.m_WorldPos;
+
+		Vector2 deltaUV1 = v2.m_Texcoord - v1.m_Texcoord;
+		Vector2 deltaUV2 = v3.m_Texcoord - v1.m_Texcoord;
+
+		float f = 1.0f / (deltaUV1.u * deltaUV2.v - deltaUV2.u * deltaUV1.v);
+
+		Vector3f tangent, bitangent, normal;
+		tangent.x = f * (deltaUV2.v * edge1.x - deltaUV1.v * edge2.x);
+		tangent.y = f * (deltaUV2.v * edge1.y - deltaUV1.v * edge2.y);
+		tangent.z = f * (deltaUV2.v * edge1.z - deltaUV1.v * edge2.z);
+		tangent.Normalize();
+
+		bitangent.x = f * (-deltaUV2.u * edge1.x + deltaUV1.u * edge2.x);
+		bitangent.y = f * (-deltaUV2.u * edge1.y + deltaUV1.u * edge2.y);
+		bitangent.z = f * (-deltaUV2.u * edge1.z + deltaUV1.u * edge2.z);
+		bitangent.Normalize();
+
+		normal = Vector3f::CrossProduct(tangent, bitangent);
+		normal.Normalize();
+
+		Matrix4 TBN;
+		TBN.m_Mat[0][0] = tangent.x, TBN.m_Mat[0][1] = bitangent.x, TBN.m_Mat[0][2] = normal.x;
+		TBN.m_Mat[1][0] = tangent.y, TBN.m_Mat[1][1] = bitangent.y, TBN.m_Mat[1][2] = normal.y;
+		TBN.m_Mat[2][0] = tangent.z, TBN.m_Mat[2][1] = bitangent.z, TBN.m_Mat[2][2] = normal.z;
+
+		TBN.m_Mat[0][3] = 0, TBN.m_Mat[1][3] = 0, TBN.m_Mat[2][3] = 0;
+		TBN.m_Mat[3][0] = 0, TBN.m_Mat[3][1] = 0, TBN.m_Mat[3][2] = 0;
+		TBN.m_Mat[3][3] = 1;
+
+		return TBN;
+	}
+
+	inline Vector3f GetTangent(const V2F& v1, const V2F& v2, const V2F& v3)
+	{
+		Vector3f edge1 = v2.m_WorldPos - v1.m_WorldPos;
+		Vector3f edge2 = v3.m_WorldPos - v1.m_WorldPos;
+
+		Vector2 deltaUV1 = v2.m_Texcoord - v1.m_Texcoord;
+		Vector2 deltaUV2 = v3.m_Texcoord - v1.m_Texcoord;
+
+		float f = 1.0f / (deltaUV1.u * deltaUV2.v - deltaUV2.u * deltaUV1.v);
+
+		Vector3f tangent;
+		tangent.x = f * (deltaUV2.v * edge1.x - deltaUV1.v * edge2.x);
+		tangent.y = f * (deltaUV2.v * edge1.y - deltaUV1.v * edge2.y);
+		tangent.z = f * (deltaUV2.v * edge1.z - deltaUV1.v * edge2.z);
+		tangent.Normalize();
+
+		return tangent;
+	}
+
+	inline Matrix4 GetTBN(const Vector3f& tangent, const Vector3f& bitangent, const Vector3f& normal)
+	{
+		Matrix4 TBN;
+		TBN.m_Mat[0][0] = tangent.x, TBN.m_Mat[0][1] = bitangent.x, TBN.m_Mat[0][2] = normal.x;
+		TBN.m_Mat[1][0] = tangent.y, TBN.m_Mat[1][1] = bitangent.y, TBN.m_Mat[1][2] = normal.y;
+		TBN.m_Mat[2][0] = tangent.z, TBN.m_Mat[2][1] = bitangent.z, TBN.m_Mat[2][2] = normal.z;
+
+		TBN.m_Mat[0][3] = 0, TBN.m_Mat[1][3] = 0, TBN.m_Mat[2][3] = 0;
+		TBN.m_Mat[3][0] = 0, TBN.m_Mat[3][1] = 0, TBN.m_Mat[3][2] = 0;
+		TBN.m_Mat[3][3] = 1;
+
+		return TBN;
+	}
 }

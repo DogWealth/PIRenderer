@@ -4,7 +4,7 @@ namespace PIRenderer {
 	class Matrix4
 	{
 	public:
-		Matrix4() {}
+		Matrix4();
 		Matrix4(const Matrix4& m);
 
 		Matrix4& operator=(const Matrix4& m);

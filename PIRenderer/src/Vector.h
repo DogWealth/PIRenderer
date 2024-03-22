@@ -27,6 +27,7 @@ namespace PIRenderer {
 		//标量右乘
 		Vector3<T> operator*(float k) const;
 		Vector3<T> operator/(float k) const;
+		Vector3<T> operator/(const Vector3<T>& v) const;
 		Vector3<T> operator+(float k) const;
 		Vector3<T>& operator*=(float k);
 		Vector3<T>& operator/=(float k);
@@ -52,6 +53,12 @@ namespace PIRenderer {
 		//插值
 		static Vector3<T> Interpolate(const Vector3<T>& v1, const Vector3<T>& v2, float t);
 		static Vector3<T>* Interpolate(Vector3<T>* v, const Vector3<T>& v1, const Vector3<T>& v2, float t);
+
+		//pow
+		static Vector3<T> Pow(const Vector3<T>& v, float t);
+
+		//对应元素乘
+		static Vector3<T> Mul(const Vector3<T>& v1, const Vector3<T>& v2);
 
 
 	public:
@@ -167,6 +174,12 @@ namespace PIRenderer {
 	Vector3<T> Vector3<T>::operator/(float k) const
 	{
 		return Vector3<T>(x / k, y / k, z / k);
+	}
+
+	template<class T>
+	Vector3<T> Vector3<T>::operator/(const Vector3<T>& v) const
+	{
+		return Vector3<T>(x / v.x, y / v.y, z / v.z);
 	}
 
 	template<class T>
@@ -290,6 +303,18 @@ namespace PIRenderer {
 		v->z = v1.z + (v2.z - v1.z) * t;
 		v->w = v1.w + (v2.w - v1.w) * t;
 		return v;
+	}
+
+	template<class T>
+	inline Vector3<T> Vector3<T>::Pow(const Vector3<T>& v, float t)
+	{
+		return Vector3<T>(powf(v.x, t), powf(v.y, t), powf(v.z, t));
+	}
+
+	template<class T>
+	inline Vector3<T> Vector3<T>::Mul(const Vector3<T>& v1, const Vector3<T>& v2)
+	{
+		return Vector3<T>(v1.x * v2.x, v1.y * v2.y, v1.z * v2.z);
 	}
 
 	template<class T>

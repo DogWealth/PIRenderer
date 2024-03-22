@@ -97,8 +97,9 @@ namespace PIRenderer {
 		m_DirectionLight = dLight;
 	}
 
-	void BasicShader::SetEyePos(const Vector3f eyepos)
+	void BasicShader::SetEyePos(const Vector3f& eyepos)
 	{
+		m_eyePos = eyepos;
 	}
 
 	void BasicShader::Vertex_rhw_Init(V2F* v2f)

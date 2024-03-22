@@ -35,7 +35,11 @@ namespace PIRenderer {
 		virtual void SetModelMatrix(Matrix4 Model) = 0;
 
 		virtual void SetLight(DirectionLight dLight) = 0;
-		virtual void SetEyePos(const Vector3f eyepos) = 0;
+		virtual void SetEyePos(const Vector3f& eyepos) = 0;
+
+		virtual void SetTBN(const Matrix4& tbn) = 0;
+		virtual void SetTangent(const Vector3f& t) = 0;
+		virtual void SetNormalMap(Texture* normalMap) = 0;
 
 		static Shader* Create(const std::string& name);
 	};

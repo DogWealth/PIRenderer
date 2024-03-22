@@ -2,9 +2,13 @@
 #include "Mesh.h"
 #include "Renderer.h"
 #include "Application.h"
-
+#include "test/Test_Blinn_Phong.h"
+#include "test/Test_IBL.h"
+#include "test/Test_PBR.h"
 int main()
 {
-	PIRenderer::Application app;
-	app.Run();
+	PIRenderer::Test_PBR test;
+	
+	test.Run();
+
 }

@@ -4,6 +4,10 @@
 #define PI 3.1415
 
 namespace PIRenderer {
+	Matrix4::Matrix4()
+	{
+	}
+
 	Matrix4::Matrix4(const Matrix4& m)
 	{
 		for(int i=0; i<4; i++)
