@@ -163,7 +163,7 @@ namespace PIRenderer {
 
 	Matrix4 Matrix4::LookAt(const Vector3f& eyePos, const Vector3f& lookAt, const Vector3f& upAxis)
 	{
-		Vector3f lookDir = lookAt;
+		Vector3f lookDir = eyePos - lookAt;
 		lookDir.Normalize();
 
 		Vector3f rightDir = Vector3f::CrossProduct(upAxis, lookDir);

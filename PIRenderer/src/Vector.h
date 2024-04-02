@@ -7,6 +7,7 @@ namespace PIRenderer {
 	{
 	public:
 		Vector3<T>() { x = y = z = 0; w = 1; }
+		Vector3(T k) { x = y = z = k; w = 1; };
 		Vector3(T x, T y, T z);
 		Vector3(T x, T y, T z, T w);
 		Vector3(const Vector3<T>& vector);
@@ -335,11 +336,13 @@ namespace PIRenderer {
 	class Vector2
 	{
 	public:
-		Vector2() { u = v = 0.f; }
+		Vector2() { u = v = du = dv = 0.f; }
 		Vector2(float u, float v)
 		{
 			this->u = u;
 			this->v = v;
+			this->du = 0.f;
+			this->dv = 0.f;
 		}
 
 		Vector2 operator+(const Vector2& vec2) const
@@ -397,7 +400,7 @@ namespace PIRenderer {
 
 
 	public:
-		float u, v;
+		float u, v, du, dv;
 	};
 
 	inline void Vector2_Print(Vector2 v)

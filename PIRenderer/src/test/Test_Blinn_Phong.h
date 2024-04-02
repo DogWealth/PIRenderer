@@ -19,6 +19,7 @@ namespace PIRenderer {
 		Shader* m_SimpleDepthShader;
 
 		Texture* m_HeadTexture;
+		Texture* m_FloorTexture;
 		Texture* m_NormalMap;
 
 		std::vector<std::vector<double>>* m_ExSAT;

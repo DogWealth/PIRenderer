@@ -1,8 +1,13 @@
-#include "PbrShader.h"
+#include "IBLShader.h"
 
 namespace PIRenderer {
-	void PbrShader::FragmentShader(V2F* v)
+	void IBLShader::FragmentShader(V2F* v)
 	{
+		if (m_IrradianceMap == nullptr)
+		{
+			printf("Ã»ÓÐÉèÖÃIrradianceMap!\n");
+			return;
+		}
 		if (m_AlbedoMap)
 		{
 			m_albedo = (m_AlbedoMap->Sample(v->m_Texcoord.u, v->m_Texcoord.v));
@@ -56,51 +61,39 @@ namespace PIRenderer {
 
 		Lo = Vector3f::Mul((specular + Vector3f::Mul(kD, m_albedo) / PI), radiance) * NdotL;
 
-		Vector3f ambient = Vector3f::Mul(Vector3f(0.03f, 0.03f, 0.03f), m_albedo) * m_ao;
-		Vector3f color = Lo;
+		//ambient
+		kS = FresnelSchlick(std::max(N * V, 0.0f), F0, m_roughness);
+		kD = -kS + 1.0f;
+		kD *= (1.0 - m_metallic);
+		Vector3f irradiance = m_IrradianceMap->Sample(N);
+		Vector3f diffuse = Vector3f::Mul(irradiance, m_albedo);
+
+		const float MAX_REFLECTION_LOD = 4.0;
+		Vector3f R = Vector3f::Normalize(2.0 * V * N * N - V);
+		Vector3f prefliterColor = m_PrefilterMap->
+			TrilinearSample(R, m_roughness * MAX_REFLECTION_LOD);
+		Vector3f envBrdf = m_LUTMap->Sample(std::max(N * V, 0.0f), m_roughness);
+		F = FresnelSchlick(std::max(N * V, 0.0f), F0, m_roughness);
+		specular = prefliterColor * (F * envBrdf.x + envBrdf.y);
+		specular = Vector3f::Mul(specular, m_albedo);
+
+		Vector3f ambient = (Vector3f::Mul(diffuse, kD) + specular) * m_ao;
+
+		Vector3f color = ambient + Lo;
 
 		color = color / (color + 1.0f);
 		color = Vector3f::Pow(color, (1.0 / 2.2));
 
 		v->m_Color = color;
-
 	}
 
-	Vector3f PbrShader::FresnelSchlick(float cosTheta, Vector3f F0)
+	Vector3f IBLShader::FresnelSchlick(float cosTheta, Vector3f F0, float roughness)
+	{
+		return F0 + (Max(Vector3f(1.0f - roughness), F0) - F0) * pow(std::min(std::max(1.0 - cosTheta, 0.0), 1.0), 5.0);
+	}
+
+	Vector3f IBLShader::FresnelSchlick(float cosTheta, Vector3f F0)
 	{
 		return F0 + (-F0 + 1.0) * pow(std::min(std::max(1.0 - cosTheta, 0.0), 1.0), 5.0);
-	}
-
-	float PbrShader::DistributionGGX(Vector3f N, Vector3f H, float roughness)
-	{
-		float a = roughness * roughness;
-		float a2 = a * a;
-		float NdotH = std::max(N * H, 0.0f);
-		float NdotH2 = NdotH * NdotH;
-
-		float num = a2;
-		float denom = (NdotH2 * (a2 - 1.0) + 1.0);
-		denom = PI * denom * denom;
-
-		return num / denom;
-	}
-	float PbrShader::GeometrySchlickGGX(float NdotV, float roughness)
-	{
-		float r = (roughness + 1.0);
-		float k = (r * r) / 8.0;
-
-		float num = NdotV;
-		float denom = NdotV * (1.0 - k) + k;
-
-		return num / denom;
-	}
-	float PbrShader::GeometrySmith(Vector3f N, Vector3f V, Vector3f L, float roughness)
-	{
-		float NdotV = std::max(N * V, 0.0f);
-		float NdotL = std::max(N * L, 0.0f);
-		float ggx2 = GeometrySchlickGGX(NdotV, roughness);
-		float ggx1 = GeometrySchlickGGX(NdotL, roughness);
-
-		return ggx1 * ggx2;
 	}
 }

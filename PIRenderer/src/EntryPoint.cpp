@@ -7,7 +7,7 @@
 #include "test/Test_PBR.h"
 int main()
 {
-	PIRenderer::Test_PBR test;
+	PIRenderer::Test_IBL test;
 	
 	test.Run();
 

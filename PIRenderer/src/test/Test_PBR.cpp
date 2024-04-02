@@ -5,7 +5,7 @@ namespace PIRenderer {
     {
         m_SphereMesh = new Mesh("obj/sphere.obj");
         m_SphereShader = Shader::Create("PbrShader");
-        m_AlbedoMap = new Texture("obj/sphere/rustediron2_basecolor.tga");
+        //m_AlbedoMap = new Texture("obj/sphere/rustediron2_basecolor.tga");
         //m_NormalMap = new Texture("obj/sphere/rustediron2_normal.tga");
         m_MetallicMap = new Texture("obj/sphere/rustediron2_metallic.tga");
         m_RoughnessMap = new Texture("obj/sphere/rustediron2_roughness.tga");
@@ -37,10 +37,10 @@ namespace PIRenderer {
 
         Matrix4 ModelMatrix = Matrix4::Scale(0.01, 0.01, 0.01);
         Matrix4 VPMatrix = m_Controller->GetCamera().GetViewProjectionMatrix();
-        Vector3f lightPos = { (float)(5 * sin(clock() / 10 * PI / 180.0f) * cos(45 * PI / 180.0f)),
+        /*Vector3f lightPos = { (float)(5 * sin(clock() / 10 * PI / 180.0f) * cos(45 * PI / 180.0f)),
                             (float)(5 * sin(0 * PI / 180.0f)),
-                            (float)(5 * cos(clock() / 10 * PI / 180.0f) * cos(45 * PI / 180.0f)) };
-        //Vector3f lightPos = { 0.0f,  0.0f, 0.0f };
+                            (float)(5 * cos(clock() / 10 * PI / 180.0f) * cos(45 * PI / 180.0f)) };*/
+        Vector3f lightPos = { 0.0f,  0.0f, 10.0f };
         DirectionLight dLight = { -lightPos, lightPos, 300 };
         Matrix4 LightModelMatrix = Matrix4::Scale(0.1, 0.1, 0.1) * Matrix4::Translate(dLight.GetPosition());
 
@@ -54,7 +54,7 @@ namespace PIRenderer {
         dynamic_cast<PbrShader*>(m_SphereShader)->SetMetallicMap(m_MetallicMap);
         dynamic_cast<PbrShader*>(m_SphereShader)->SetRoughnessMap(m_RoughnessMap);
 
-        dynamic_cast<PbrShader*>(m_SphereShader)->SetAlbedo({ 0.5f, 0.5f, 0.5f });
+        dynamic_cast<PbrShader*>(m_SphereShader)->SetAlbedo({ 0.5f, 0.f, 0.f });
         dynamic_cast<PbrShader*>(m_SphereShader)->SetAmbientOcclusion(1.0f);
         dynamic_cast<PbrShader*>(m_SphereShader)->SetMetallic(0.5f);
         dynamic_cast<PbrShader*>(m_SphereShader)->SetRoughness(0.5f);

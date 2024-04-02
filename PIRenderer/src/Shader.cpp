@@ -5,6 +5,10 @@
 #include "shader/SimpleDepthShader.h"
 #include "shader/SkyBoxShader.h"
 #include "shader/PbrShader.h"
+#include "shader/SimpleIrradianceShader.h"
+#include "shader/IBLShader.h"
+#include "shader/PrefilterShader.h"
+#include "shader/BrdfLUTShader.h"
 namespace PIRenderer {
 	Shader* Shader::Create(const std::string& name)
 	{
@@ -20,6 +24,14 @@ namespace PIRenderer {
 			return new SkyBoxShader();
 		else if (name == "PbrShader")
 			return new PbrShader();
+		else if (name == "SimpleIrradianceShader")
+			return new SimpleIrradianceShader();
+		else if (name == "IBLShader")
+			return new IBLShader();
+		else if (name == "PrefilterShader")
+			return new PrefilterShader();
+		else if (name == "BrdfLUTShader")
+			return new BrdfLUTShader();
 
 		return nullptr;
 	}

@@ -1,14 +1,19 @@
 #include "Test_Blinn_Phong.h"
 #include "../shader/Blinn_PhongShader.h"
 #include "../math.h"
+#include "../shader/SimpleIrradianceShader.h"
 PIRenderer::Test_Blinn_Phong::Test_Blinn_Phong()
 {
 	m_FloorMesh = new PIRenderer::Mesh("obj/floor.obj");//注意相对路径时相对PIRenderer这个文件夹开始的
 	m_FloorShader = PIRenderer::Shader::Create("Blinn_PhongShader");
+	m_FloorTexture = new PIRenderer::Texture("obj/floor_diffuse.tga");
+	m_FloorShader->SetTexture(m_FloorTexture);
 
 	m_HeadMesh = new PIRenderer::Mesh("obj/african_head.obj");
 	m_HeadShader = PIRenderer::Shader::Create("Blinn_PhongShader");
 	m_HeadTexture = new PIRenderer::Texture("obj/african_head_diffuse.tga");
+	m_HeadTexture->SetSampleMode(Bilinear);
+	//m_HeadTexture->GenerateMipMap(7);
 	//m_NormalMap = new Texture("obj/african_normal_tangent.tga");
 
 	m_LightMesh = new PIRenderer::Mesh("obj/cube.obj");
@@ -25,6 +30,32 @@ PIRenderer::Test_Blinn_Phong::Test_Blinn_Phong()
 
 	m_DepthSquareBuffer = new float[WIDTH * HEIGHT];
 	m_ShadowMap = new float[WIDTH * HEIGHT];
+
+	//test
+	/*m_Controller->OnUpdate(1);
+	m_Renderer->SetDepthSquareBuffer(nullptr);
+	m_Renderer->SetDepthBuffer(m_DepthBuffer);
+	m_Renderer->Clear();
+	Mesh HeadMesh = PIRenderer::Mesh("obj/african_head.obj");
+	Shader* HeadShader = PIRenderer::Shader::Create("SimpleIrradianceShader");
+	Texture HeadTexture = PIRenderer::Texture("obj/african_head_diffuse.tga");
+	Texture IrrandianceMap = Texture(128, 128);
+	HeadShader->SetTexture(&HeadTexture);
+	dynamic_cast<SimpleIrradianceShader*>(HeadShader)->SetIrradianceMap(&IrrandianceMap);
+	Matrix4 VPMatrix = Matrix4::Identity();
+	Matrix4 HeadModelMatrix = Matrix4::Scale(1, 1, 1) * Matrix4::RotateY(90);
+	m_Renderer->UseBackFaceCulling(false);
+	m_Renderer->UseDepthTest(false);
+	m_Renderer->BindShader(HeadShader);
+	HeadShader->SetVPMatrix(VPMatrix);
+	HeadShader->SetModelMatrix(HeadModelMatrix);
+	HeadShader->SetEyePos(m_Controller->GetCamera().GetPosition());
+
+	Render(&HeadMesh);
+
+	IrrandianceMap.Save("obj/Irrandiance.tga");
+	m_Window->OnUpdate();*/
+
 }
 
 PIRenderer::Test_Blinn_Phong::~Test_Blinn_Phong()
@@ -34,6 +65,7 @@ PIRenderer::Test_Blinn_Phong::~Test_Blinn_Phong()
 	delete m_HeadMesh;
 	delete m_HeadShader;
 	delete m_HeadTexture;
+	delete m_FloorTexture;
 	delete m_LightMesh;
 	delete m_LightShader;
 	delete m_SimpleDepthShader;
@@ -50,16 +82,16 @@ void PIRenderer::Test_Blinn_Phong::OnUpdate(double tick)
 	Matrix4 ModelMatrix = Matrix4::Scale(0.1, 0.1, 0.1) * Matrix4::RotateX(90) * Matrix4::Translate(0, -1, 0);
 	Matrix4 HeadModelMatrix = Matrix4::Scale(1, 1, 1);
 
-	Vector3f lightPos = { (float)(2 * sin(clock() / 10 * PI / 180.0f) * cos(45 * PI / 180.0f)),
+	/*Vector3f lightPos = { (float)(2 * sin(clock() / 10 * PI / 180.0f) * cos(45 * PI / 180.0f)),
 							(float)(2 * sin(45 * PI / 180.0f)),
-							(float)(2 * cos(clock() / 10 * PI / 180.0f) * cos(45 * PI / 180.0f)) };
+							(float)(2 * cos(clock() / 10 * PI / 180.0f) * cos(45 * PI / 180.0f)) };*/
 
-
+	Vector3f lightPos = { 0, 4, 10 };
 	DirectionLight dLight = { -lightPos, lightPos, 1 };
 
 	Matrix4 LightModelMatrix = Matrix4::Scale(0.1, 0.1, 0.1) * Matrix4::Translate(dLight.GetPosition());
 
-	Matrix4 LightSpaceMatrix = Matrix4::LookAt(lightPos, lightPos, { 0, 1, 0 }) *
+	Matrix4 LightSpaceMatrix = Matrix4::LookAt(lightPos, {0, 0, 0}, {0, 1, 0}) *
 		Matrix4::Orthographic(-5, 5, -5, 5, 50, 1);
 
 	//caculate shadowmap
@@ -77,8 +109,8 @@ void PIRenderer::Test_Blinn_Phong::OnUpdate(double tick)
 	//Render(m_FloorMesh);
 
 
-	//GetSummedAreaTable(m_ExSAT, m_ShadowMap, WIDTH, HEIGHT);
-	//GetSummedAreaTable(m_ExSquareSAT, m_DepthSquareBuffer, WIDTH, HEIGHT);
+	/*GetSummedAreaTable(m_ExSAT, m_ShadowMap, WIDTH, HEIGHT);
+	GetSummedAreaTable(m_ExSquareSAT, m_DepthSquareBuffer, WIDTH, HEIGHT);*/
 
 
 	dynamic_cast<Blinn_PhongShader*>(m_FloorShader)->SetExSAT(m_ExSAT);

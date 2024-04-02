@@ -144,10 +144,27 @@ namespace PIRenderer {
 		int x1 = v1->m_ScreenPos.x;
 		int x2 = v2->m_ScreenPos.x;
 
-		for (int x = x1; x < x2; x++)
+		Vector2 lastuv = v1->m_Texcoord;
+
+		for (int x = x1; x <= x2; x++)
 		{
-			float t = (float)(x - x1) / (x2 - x1);
+			float t = (float)(x - x1) / (x2 - x1 + 0.001);
 			V2F::Interpolate(v, *v1, *v2, t);
+
+			//设置下纹理的lod，主要是uv的差值，用来多级渐远纹理
+			v->m_Texcoord.du = v->m_Texcoord.u - lastuv.u;
+			v->m_Texcoord.dv = v->m_Texcoord.v - lastuv.v;
+
+			if (x == x1)
+			{
+				t = 1.0f / (x2 - x1);
+				lastuv = Vector2::Interpolate(v1->m_Texcoord, v2->m_Texcoord, t);
+				v->m_Texcoord.du = v->m_Texcoord.u - lastuv.u;
+				v->m_Texcoord.dv = v->m_Texcoord.v - lastuv.v;
+			}
+
+			lastuv.u = v->m_Texcoord.u;
+			lastuv.v = v->m_Texcoord.v;
 
 			//透视矫正
 			float rhw_z = v->m_rhw;
@@ -155,6 +172,8 @@ namespace PIRenderer {
 			v->m_Color /= rhw_z;
 			v->m_Normal /= rhw_z;
 			v->m_Texcoord /= rhw_z;
+			v->m_Texcoord.du /= rhw_z;
+			v->m_Texcoord.dv /= rhw_z;
 
 			////Early-Z
 			//int index = (int)v->m_ScreenPos.y * m_Width + (int)v->m_ScreenPos.x;
@@ -205,12 +224,15 @@ namespace PIRenderer {
 		V2F v;
 
 
-		for (int y = p1.y + 1; y <= p2.y; y++)
+		for (int y = p1.y; y <= p2.y; y++)
 		{
 			float halfH = p2.y - p1.y + 1e-8;
 
 			float t_12 = (float)(y - p1.y) / halfH;
 			float t_13 = (float)(y - p1.y) / totalH;
+
+			if (t_12 < 0)
+				t_12 = t_13 = 0;
 
 			V2F::Interpolate(&v_12, *v1, *v2, t_12);
 			V2F::Interpolate(&v_13, *v1, *v3, t_13);
@@ -221,12 +243,14 @@ namespace PIRenderer {
 		}
 
 		//下三角形
-		for (int y = p2.y + 1; y <= p3.y; y++)
+		for (int y = p2.y; y <= p3.y; y++)
 		{
 			float halfH = p3.y - p2.y + 1e-8;
 			float t_23 = (float)(y - p2.y) / halfH;
 			float t_13 = (float)(y - p1.y) / totalH;
 
+			if (t_23 < 0)
+				t_23 = t_13 = 0;
 
 			V2F::Interpolate(&v_23, *v2, *v3, t_23);
 			V2F::Interpolate(&v_13, *v1, *v3, t_13);

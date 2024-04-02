@@ -17,15 +17,15 @@ namespace PIRenderer {
 		void SetRoughnessMap(Texture* RoughnessMap) { m_RoughnessMap = RoughnessMap; }
 		void SetAoMap(Texture* AoMap) { m_AoMap = AoMap; }
 
-	private:
+	protected:
 		Vector3f FresnelSchlick(float cosTheta, Vector3f F0);
 		float DistributionGGX(Vector3f N, Vector3f H, float roughness);
 		float GeometrySchlickGGX(float NdotV, float roughness);
 		float GeometrySmith(Vector3f N, Vector3f V, Vector3f L, float roughness);
 
-	private:
+	protected:
 		Vector3f m_albedo;//∑¥…‰¬ 
-		float m_metallic; 
+		float m_metallic = 0.0f; 
 		float m_roughness;
 		float m_ao;
 

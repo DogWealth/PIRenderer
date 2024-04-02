@@ -123,4 +123,47 @@ namespace PIRenderer {
 
 		return TBN;
 	}
+
+	inline Vector3f Max(const Vector3f& v1, const Vector3f& v2)
+	{
+		return Vector3f(std::max(v1.x, v2.x), std::max(v1.y, v2.y), std::max(v1.z, v2.z));
+	}
+
+	inline float RadicalInverse_VdC(uint32_t bits)
+	{
+		bits = (bits << 16u) | (bits >> 16u);
+		bits = ((bits & 0x55555555u) << 1u) | ((bits & 0xAAAAAAAAu) >> 1u);
+		bits = ((bits & 0x33333333u) << 2u) | ((bits & 0xCCCCCCCCu) >> 2u);
+		bits = ((bits & 0x0F0F0F0Fu) << 4u) | ((bits & 0xF0F0F0F0u) >> 4u);
+		bits = ((bits & 0x00FF00FFu) << 8u) | ((bits & 0xFF00FF00u) >> 8u);
+		return float(bits) * 2.3283064365386963e-10; // / 0x100000000
+	}
+
+	inline Vector2 Hammersley(uint32_t i, uint32_t N)
+	{
+		return Vector2(float(i) / float(N), RadicalInverse_VdC(i));
+	}
+
+	inline Vector3f ImportanceSampleGGX(Vector2 Xi, Vector3f N, float roughness)
+	{
+		float a = roughness * roughness;
+
+		float phi = 2.0 * PI * Xi.u;
+		float cosTheta = sqrt((1.0 - Xi.v) / (1.0 + (a * a - 1.0) * Xi.v));
+		float sinTheta = sqrt(1.0 - cosTheta * cosTheta);
+
+		// from spherical coordinates to cartesian coordinates
+		Vector3f H;
+		H.x = cos(phi) * sinTheta;
+		H.y = sin(phi) * sinTheta;
+		H.z = cosTheta;
+
+		// from tangent-space vector to world-space sample vector
+		Vector3f up = abs(N.z) < 0.999 ? Vector3f(0.0, 0.0, 1.0) : Vector3f(1.0, 0.0, 0.0);
+		Vector3f tangent = Vector3f::Normalize(Vector3f::CrossProduct(up, N));
+		Vector3f bitangent = Vector3f::CrossProduct(N, tangent);
+
+		Vector3f sampleVec = tangent * H.x + bitangent * H.y + N * H.z;
+		return Vector3f::Normalize(sampleVec);
+	}
 }

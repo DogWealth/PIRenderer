@@ -9,10 +9,10 @@ namespace PIRenderer {
 		~Test_PBR();
 		virtual void OnUpdate(double tick) override;
 
-	private:
+	protected:
 		void ShowSphereMatrix();
 
-	private:
+	protected:
 		Mesh* m_SphereMesh;
 		Shader* m_SphereShader;
 

@@ -97,6 +97,6 @@ namespace PIRenderer {
 		m_CameraPosition.z = Radius * cos(Theta * PI / 180.0f) * cos(Phi * PI / 180.0f);
 
 		m_Camera.SetPosition(m_CameraPosition);
-		m_Camera.LookAt(m_CameraPosition, m_CameraPosition, {0, 1, 0});
+		m_Camera.LookAt(m_CameraPosition, {0, 0, 0}, {0, 1, 0});
 	}
 }

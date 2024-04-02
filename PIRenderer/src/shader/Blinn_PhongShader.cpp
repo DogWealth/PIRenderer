@@ -16,7 +16,9 @@ void PIRenderer::Blinn_PhongShader::FragmentShader(V2F* v)
 {
 	Vector3f objectColor;
 	if (m_Texture)
-		objectColor = (m_Texture->Sample(v->m_Texcoord.u, v->m_Texcoord.v));
+	{
+		objectColor = (m_Texture->Sample(v->m_Texcoord));
+	}
 	else
 		objectColor = { 1, 1, 1 };
 	float lightIntensity = m_DirectionLight.GetIntensity();
@@ -38,7 +40,7 @@ void PIRenderer::Blinn_PhongShader::FragmentShader(V2F* v)
 		normal.Normalize();
 		normal = normal * TBN;
 	}
-	Vector3f lightDir = m_DirectionLight.GetDirection();
+	Vector3f lightDir = Vector3f::Normalize(m_DirectionLight.GetDirection());
 	float Kd = 0.7;
 	float diff = std::max(normal * lightDir, 0.0f) * Kd;
 	float diffuse = lightIntensity * diff;

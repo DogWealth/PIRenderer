@@ -114,7 +114,7 @@
       <ConformanceMode>true</ConformanceMode>
       <Optimization>Disabled</Optimization>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <LanguageStandard>stdcpp17</LanguageStandard>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
@@ -140,6 +140,10 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\shader\BrdfLUTShader.cpp" />
+    <ClCompile Include="src\shader\PrefilterShader.cpp" />
+    <ClCompile Include="src\shader\IBLShader.cpp" />
+    <ClCompile Include="src\shader\SimpleIrradianceShader.cpp" />
     <ClCompile Include="src\shader\PbrShader.cpp" />
     <ClCompile Include="src\shader\SkyBoxShader.cpp" />
     <ClCompile Include="src\shader\SimpleDepthShader.cpp" />
@@ -166,6 +170,10 @@
     <ClCompile Include="src\test\Test_PBR.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\shader\BrdfLUTShader.h" />
+    <ClInclude Include="src\shader\PrefilterShader.h" />
+    <ClInclude Include="src\shader\IBLShader.h" />
+    <ClInclude Include="src\shader\SimpleIrradianceShader.h" />
     <ClInclude Include="src\shader\PbrShader.h" />
     <ClInclude Include="src\shader\SkyBoxShader.h" />
     <ClInclude Include="src\math.h" />
