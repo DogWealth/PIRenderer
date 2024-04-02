@@ -74,8 +74,8 @@ namespace PIRenderer {
 			TrilinearSample(R, m_roughness * MAX_REFLECTION_LOD);
 		Vector3f envBrdf = m_LUTMap->Sample(std::max(N * V, 0.0f), m_roughness);
 		F = FresnelSchlick(std::max(N * V, 0.0f), F0, m_roughness);
-		specular = prefliterColor * (F * envBrdf.x + envBrdf.y);
-		specular = Vector3f::Mul(specular, m_albedo);
+		specular = Vector3f::Mul(prefliterColor, (F * envBrdf.x + envBrdf.y));
+		//specular = Vector3f::Mul(specular, m_albedo);
 
 		Vector3f ambient = (Vector3f::Mul(diffuse, kD) + specular) * m_ao;
 

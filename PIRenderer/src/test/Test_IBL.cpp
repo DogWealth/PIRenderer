@@ -277,7 +277,7 @@ void PIRenderer::Test_IBL::OnUpdate(double tick)
 							(float)(5 * sin(0 * PI / 180.0f)),
 							(float)(5 * cos(clock() / 10 * PI / 180.0f) * cos(45 * PI / 180.0f)) };*/
 	Vector3f lightPos = { 0.0f,  0.0f, 10.0f };
-	DirectionLight dLight = { -lightPos, lightPos, 0 };
+	DirectionLight dLight = { -lightPos, lightPos, 300 };
 	Matrix4 LightModelMatrix = 
 		Matrix4::Scale(0.1, 0.1, 0.1) * Matrix4::Translate(dLight.GetPosition());
 
@@ -286,15 +286,15 @@ void PIRenderer::Test_IBL::OnUpdate(double tick)
 	m_SphereShader->SetVPMatrix(VPMatrix);
 	m_SphereShader->SetEyePos(m_Controller->GetCamera().GetPosition());
 
-	/*dynamic_cast<PbrShader*>(m_SphereShader)->SetAlbedoMap(m_AlbedoMap);
+	dynamic_cast<PbrShader*>(m_SphereShader)->SetAlbedoMap(m_AlbedoMap);
 	dynamic_cast<PbrShader*>(m_SphereShader)->SetNormalMap(m_NormalMap);
 	dynamic_cast<PbrShader*>(m_SphereShader)->SetMetallicMap(m_MetallicMap);
-	dynamic_cast<PbrShader*>(m_SphereShader)->SetRoughnessMap(m_RoughnessMap);*/
+	dynamic_cast<PbrShader*>(m_SphereShader)->SetRoughnessMap(m_RoughnessMap);
 
 	dynamic_cast<PbrShader*>(m_SphereShader)->SetAlbedo({ 1.f, 1.f, 1.f });
 	dynamic_cast<PbrShader*>(m_SphereShader)->SetAmbientOcclusion(1.0f);
 	dynamic_cast<PbrShader*>(m_SphereShader)->SetMetallic(1.0f);
-	dynamic_cast<PbrShader*>(m_SphereShader)->SetRoughness(0.0f);
+	dynamic_cast<PbrShader*>(m_SphereShader)->SetRoughness(0.1f);
 
 	m_Renderer->BindShader(m_SphereShader);
 
