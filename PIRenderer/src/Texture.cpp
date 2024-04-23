@@ -34,6 +34,7 @@ namespace PIRenderer {
 
 	Vector3f Texture::Sample(float u, float v)
 	{
+		if (v > 1) v = v - 1;//处理obj文件中v>1的情况
 		int tu = (int)(u * (m_Width - 1));
 		int tv = (int)(v * (m_Height - 1));
 
@@ -67,14 +68,14 @@ namespace PIRenderer {
 		if(dx2 > 1) lod = 0.5 * log2(du * du + dv * dv);
 
 		//可视化
-		/*if (lod == 0) return { 0, 0, 0 };
-		if (lod > 0 && lod <= 1) return { 0, 0, 1 };
-		if (lod > 1 && lod <= 2) return { 0, 1, 0 };
-		if (lod > 2 && lod <= 3) return { 0, 1, 1 };
-		if (lod > 3 && lod <= 4) return { 1, 0, 0 };
-		if (lod > 5 && lod <= 6) return { 1, 0, 1 };
-		if (lod > 6 && lod <= 7) return { 1, 1, 0 };
-		if (lod > 7 && lod <= 8) return { 1, 1, 1 };*/
+		/*if (lod == 0) return { 1, 0, 0 };
+		if (lod > 0 && lod <= 1) return { 1, 0.647, 0 };
+		if (lod > 1 && lod <= 2) return { 1, 1, 0 };
+		if (lod > 2 && lod <= 3) return { 0, 1, 0 };
+		if (lod > 3 && lod <= 4) return { 0, 1, 1 };
+		if (lod > 5 && lod <= 6) return { 0, 0, 1 };
+		if (lod > 6 && lod <= 7) return { 0.502, 0, 0.502 };
+		if (lod > 7 && lod <= 8) return { 0, 0, 0 };*/
 
 		return SampleLod(u, v, lod);
 	}
@@ -331,7 +332,7 @@ namespace PIRenderer {
 
 		if (m_CubeMap.empty()) return Vector3f();
 
-		//+0.0001自动开启双线性插值
+		//+0.0001自动开启三线性插值
 		return (m_CubeMap[face].SampleLod(uv.u, uv.v, lod + 0.0001));
 	}
 
@@ -366,7 +367,8 @@ namespace PIRenderer {
 	* 假设在一个单位1的立方体里，从立方体中心除法
 	* uv的范围在0 - 1， 而立方体是-1 - 1 要进行转换
 	* 
-	* 
+	* https://github.com/AKGWSB/EzRT/blob/main/part%201%20--%20Basic%20Raytracing%20with%20C%2B%2B/tutorial%20(.md%20%26%20.pdf%20file)/tutorial.assets/20210131162017292.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L3dlaXhpbl80NDE3NjY5Ng==,size_16,color_FFFFFF,t_70
+	* 用这个链接算法
 	*/
 	Vector2 CubeMap::GetUV(int face, const Vector3f& dir)
 	{

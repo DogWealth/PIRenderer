@@ -221,12 +221,18 @@ PIRenderer::Test_IBL::Test_IBL()
 
 
 	//sphere
-	m_SphereMesh = new Mesh("obj/sphere.obj");
+	m_SphereMesh = new Mesh("obj/helmet.obj");
 	m_SphereShader = Shader::Create("IBLShader");
-	m_AlbedoMap = new Texture("obj/sphere/rustediron2_basecolor.tga");
+	//m_AlbedoMap = new Texture("obj/sphere/rustediron2_basecolor.tga");
 	//m_NormalMap = new Texture("obj/sphere/rustediron2_normal.tga");
-	m_MetallicMap = new Texture("obj/sphere/rustediron2_metallic.tga");
-	m_RoughnessMap = new Texture("obj/sphere/rustediron2_roughness.tga");
+	//m_MetallicMap = new Texture("obj/sphere/rustediron2_metallic.tga");
+	//m_RoughnessMap = new Texture("obj/sphere/rustediron2_roughness.tga");
+
+	m_AlbedoMap = new Texture("obj/helmet/helmet_basecolor.tga");
+	//m_NormalMap = new Texture("obj/sphere/rustediron2_normal.tga");
+	m_MetallicMap = new Texture("obj/helmet/helmet_metalness.tga");
+	m_RoughnessMap = new Texture("obj/helmet/helmet_roughness.tga");
+	m_AoMap = new Texture("obj/helmet/helmet_occlusion.tga");
 
 	dynamic_cast<IBLShader*>(m_SphereShader)->SetIrradianceMap(m_IrradianceCubeMap);
 	dynamic_cast<IBLShader*>(m_SphereShader)->SetPrefilterMap(m_PrefilterCubeMap);
@@ -268,7 +274,8 @@ void PIRenderer::Test_IBL::OnUpdate(double tick)
 
 
 	//sphere
-	Matrix4 ModelMatrix = Matrix4::Scale(0.01, 0.01, 0.01);
+	Matrix4 ModelMatrix = Matrix4::Scale(2, 2, 2);
+	//Matrix4 ModelMatrix = Matrix4::Scale(0.01, 0.01, 0.01);
 	Matrix4 VPMatrix = m_Controller->GetCamera().GetViewProjectionMatrix();
 	m_Renderer->UseBackFaceCulling(true);
 	m_Renderer->UseDepthTest(true);
@@ -287,14 +294,15 @@ void PIRenderer::Test_IBL::OnUpdate(double tick)
 	m_SphereShader->SetEyePos(m_Controller->GetCamera().GetPosition());
 
 	dynamic_cast<PbrShader*>(m_SphereShader)->SetAlbedoMap(m_AlbedoMap);
-	dynamic_cast<PbrShader*>(m_SphereShader)->SetNormalMap(m_NormalMap);
+	//dynamic_cast<PbrShader*>(m_SphereShader)->SetNormalMap(m_NormalMap);
 	dynamic_cast<PbrShader*>(m_SphereShader)->SetMetallicMap(m_MetallicMap);
 	dynamic_cast<PbrShader*>(m_SphereShader)->SetRoughnessMap(m_RoughnessMap);
+	dynamic_cast<PbrShader*>(m_SphereShader)->SetAoMap(m_AoMap);
 
-	dynamic_cast<PbrShader*>(m_SphereShader)->SetAlbedo({ 1.f, 1.f, 1.f });
+	dynamic_cast<PbrShader*>(m_SphereShader)->SetAlbedo({ 0.8f, 0.f, 0.f });
 	dynamic_cast<PbrShader*>(m_SphereShader)->SetAmbientOcclusion(1.0f);
 	dynamic_cast<PbrShader*>(m_SphereShader)->SetMetallic(1.0f);
-	dynamic_cast<PbrShader*>(m_SphereShader)->SetRoughness(0.1f);
+	dynamic_cast<PbrShader*>(m_SphereShader)->SetRoughness(0.01f);
 
 	m_Renderer->BindShader(m_SphereShader);
 

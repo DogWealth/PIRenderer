@@ -5,7 +5,7 @@ namespace PIRenderer {
     {
         m_SphereMesh = new Mesh("obj/sphere.obj");
         m_SphereShader = Shader::Create("PbrShader");
-        //m_AlbedoMap = new Texture("obj/sphere/rustediron2_basecolor.tga");
+        m_AlbedoMap = new Texture("obj/sphere/rustediron2_basecolor.tga");
         //m_NormalMap = new Texture("obj/sphere/rustediron2_normal.tga");
         m_MetallicMap = new Texture("obj/sphere/rustediron2_metallic.tga");
         m_RoughnessMap = new Texture("obj/sphere/rustediron2_roughness.tga");

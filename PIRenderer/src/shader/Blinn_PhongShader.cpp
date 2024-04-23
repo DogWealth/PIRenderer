@@ -149,7 +149,7 @@ float PIRenderer::Blinn_PhongShader::ShadowClaculation(const Vector3f& worldPos)
 	else if (m_UsePCSS)
 	{
 		int numSample = 20;
-		float lightSize = 3;
+		float lightSize = 50;
 		float zReceiver = currentDepth;
 
 		poissonDiskSamples(Vector2(lightSpacePos.x, lightSpacePos.y), numSample);

@@ -9,6 +9,7 @@
 #include "Shader.h"
 #include "Camera.h"
 #include "CameraController.h"
+#include "../thread/thread.h"
 namespace PIRenderer {
 	class Renderer
 	{
@@ -53,7 +54,7 @@ namespace PIRenderer {
 
 	private:
 		void ViewPort(Vector3f* pos);
-		bool FaceCulling(const Vector3f& v1, const Vector3f v2, const Vector3f v3);//±³ÃæÌÞ³ý
+		bool FaceCulling(const Vector3f& v1, const Vector3f& v2, const Vector3f& v3);//±³ÃæÌÞ³ý
 		bool ViewCulling(const Vector3f& v1, const Vector3f v2, const Vector3f v3);
 		void PerspectiveDivision(V2F* v);
 		//ÊÓ×¶ÌÞ³ýºÍÆë´Î²Ã¼ô
@@ -89,5 +90,7 @@ namespace PIRenderer {
 
 		bool m_UseBackCulling = false;
 		bool m_UseDepthTest = true;
+
+		ThreadPool* m_ThreadPool;
 	};
 }

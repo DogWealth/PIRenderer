@@ -4,17 +4,21 @@
 #include <time.h>
 #include "math.h"
 namespace PIRenderer {
+
 	Renderer::Renderer(uint32_t* framBuffer, float* depthBuffer, int width, int height)
 		: m_FramBuffer(framBuffer), m_Width(width), m_Height(height)
 	{
 		m_DepthBuffer = depthBuffer;
 
 		m_Shader = nullptr;
+
+		m_ThreadPool = new ThreadPool(8);
 	}
 
 	Renderer::~Renderer()
 	{
 		//delete[] m_DepthBuffer;
+		delete m_ThreadPool;
 	}
 
 	void Renderer::SetPixel(int x, int y, float z, uint32_t color)
@@ -238,9 +242,11 @@ namespace PIRenderer {
 			V2F::Interpolate(&v_13, *v1, *v3, t_13);
 
 			if (v_12.m_ScreenPos.x > v_13.m_ScreenPos.x) std::swap(v_12, v_13);
-
+			//m_ThreadPool->Enqueue(&PIRenderer::Renderer::DrawScanline, this, &v, &v_12, &v_13);
+			//每一步跟新看看问题
 			DrawScanline(&v, &v_12, &v_13);
 		}
+
 
 		//下三角形
 		for (int y = p2.y; y <= p3.y; y++)
@@ -402,7 +408,7 @@ namespace PIRenderer {
 	}
 
 	//背面剔除
-	bool Renderer::FaceCulling(const Vector3f& v1, const Vector3f v2, const Vector3f v3)
+	bool Renderer::FaceCulling(const Vector3f& v1, const Vector3f& v2, const Vector3f& v3)
 	{
 		Vector3f v12 = v2 - v1;
 		Vector3f v13 = v3 - v1;

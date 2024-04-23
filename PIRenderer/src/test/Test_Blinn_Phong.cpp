@@ -82,11 +82,11 @@ void PIRenderer::Test_Blinn_Phong::OnUpdate(double tick)
 	Matrix4 ModelMatrix = Matrix4::Scale(0.1, 0.1, 0.1) * Matrix4::RotateX(90) * Matrix4::Translate(0, -1, 0);
 	Matrix4 HeadModelMatrix = Matrix4::Scale(1, 1, 1);
 
-	/*Vector3f lightPos = { (float)(2 * sin(clock() / 10 * PI / 180.0f) * cos(45 * PI / 180.0f)),
+	Vector3f lightPos = { (float)(2 * sin(clock() / 10 * PI / 180.0f) * cos(45 * PI / 180.0f)),
 							(float)(2 * sin(45 * PI / 180.0f)),
-							(float)(2 * cos(clock() / 10 * PI / 180.0f) * cos(45 * PI / 180.0f)) };*/
+							(float)(2 * cos(clock() / 10 * PI / 180.0f) * cos(45 * PI / 180.0f)) };
 
-	Vector3f lightPos = { 0, 4, 10 };
+	//Vector3f lightPos = { 0, 4, 10 };
 	DirectionLight dLight = { -lightPos, lightPos, 1 };
 
 	Matrix4 LightModelMatrix = Matrix4::Scale(0.1, 0.1, 0.1) * Matrix4::Translate(dLight.GetPosition());
@@ -95,32 +95,32 @@ void PIRenderer::Test_Blinn_Phong::OnUpdate(double tick)
 		Matrix4::Orthographic(-5, 5, -5, 5, 50, 1);
 
 	//caculate shadowmap
-	//m_Renderer->SetDepthBuffer(m_ShadowMap);
-	//m_Renderer->SetDepthSquareBuffer(m_DepthSquareBuffer);//这个每次也要绑定跟新
-	//m_Renderer->UseDepthTest(true);
-	//m_Renderer->Clear();
+	m_Renderer->SetDepthBuffer(m_ShadowMap);
+	m_Renderer->SetDepthSquareBuffer(m_DepthSquareBuffer);//这个每次也要绑定跟新
+	m_Renderer->UseDepthTest(true);
+	m_Renderer->Clear();
 
-	//m_Renderer->BindShader(m_SimpleDepthShader);
-	//m_SimpleDepthShader->SetVPMatrix(LightSpaceMatrix);
-	//m_SimpleDepthShader->SetModelMatrix(HeadModelMatrix);
-	//Render(m_HeadMesh);
+	m_Renderer->BindShader(m_SimpleDepthShader);
+	m_SimpleDepthShader->SetVPMatrix(LightSpaceMatrix);
+	m_SimpleDepthShader->SetModelMatrix(HeadModelMatrix);
+	Render(m_HeadMesh);
 
-	//m_SimpleDepthShader->SetModelMatrix(ModelMatrix);
-	//Render(m_FloorMesh);
+	m_SimpleDepthShader->SetModelMatrix(ModelMatrix);
+	Render(m_FloorMesh);
 
 
-	/*GetSummedAreaTable(m_ExSAT, m_ShadowMap, WIDTH, HEIGHT);
-	GetSummedAreaTable(m_ExSquareSAT, m_DepthSquareBuffer, WIDTH, HEIGHT);*/
+	GetSummedAreaTable(m_ExSAT, m_ShadowMap, WIDTH, HEIGHT);
+	GetSummedAreaTable(m_ExSquareSAT, m_DepthSquareBuffer, WIDTH, HEIGHT);
 
 
 	dynamic_cast<Blinn_PhongShader*>(m_FloorShader)->SetExSAT(m_ExSAT);
 	dynamic_cast<Blinn_PhongShader*>(m_FloorShader)->SetExSquareSAT(m_ExSquareSAT);
 
 	dynamic_cast<Blinn_PhongShader*>(m_FloorShader)->SetShaowMap(m_ShadowMap, WIDTH, HEIGHT);
-	dynamic_cast<Blinn_PhongShader*>(m_FloorShader)->UseShadow(false);
+	dynamic_cast<Blinn_PhongShader*>(m_FloorShader)->UseShadow(true);
 	dynamic_cast<Blinn_PhongShader*>(m_FloorShader)->UsePCF(false);
 	dynamic_cast<Blinn_PhongShader*>(m_FloorShader)->UsePCSS(false);
-	dynamic_cast<Blinn_PhongShader*>(m_FloorShader)->UseVSSM(false);
+	dynamic_cast<Blinn_PhongShader*>(m_FloorShader)->UseVSSM(true);
 	dynamic_cast<Blinn_PhongShader*>(m_FloorShader)->SetLightSpaceMatrix(LightSpaceMatrix);
 
 	dynamic_cast<Blinn_PhongShader*>(m_HeadShader)->SetShaowMap(m_ShadowMap, WIDTH, HEIGHT);

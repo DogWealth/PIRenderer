@@ -57,7 +57,7 @@ namespace PIRenderer {
 		Lo = Vector3f::Mul((specular + Vector3f::Mul(kD, m_albedo) / PI), radiance) * NdotL;
 
 		Vector3f ambient = Vector3f::Mul(Vector3f(0.03f, 0.03f, 0.03f), m_albedo) * m_ao;
-		Vector3f color = Lo;
+		Vector3f color = Lo + ambient;
 
 		color = color / (color + 1.0f);
 		color = Vector3f::Pow(color, (1.0 / 2.2));

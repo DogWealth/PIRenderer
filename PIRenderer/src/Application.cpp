@@ -31,7 +31,8 @@ namespace PIRenderer {
 		{
 			double time = clock();
 			double tick = time - old_time;
-			printf("FPS: %lf\n", 1000 / tick);
+			printf("\r");
+			printf("FPS: %lf", 1000 / tick);
 			old_time = time;
 			//SDL_LockSurface(m_Surface);
 
